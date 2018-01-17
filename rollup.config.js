@@ -10,8 +10,9 @@ import resolve    from 'rollup-plugin-node-resolve';
 import uglify     from 'rollup-plugin-uglify';
 import { minify } from 'uglify-es';
 
-const path   = require('path');
-const fnName = 'getCssData';
+const path      = require('path');
+const entryFile = path.resolve(__dirname, 'src', 'index.js');
+const fnName    = 'getCssData';
 
 
 // Constants & Variables
@@ -65,7 +66,7 @@ const settings = {
 // =============================================================================
 // Base
 const config = {
-    input : path.resolve(__dirname, 'src', 'index.js'),
+    input : entryFile,
     output: {
         file     : path.resolve(__dirname, 'dist', `${pkg.name}.js`),
         name     : fnName,
@@ -89,7 +90,7 @@ const config = {
 // ES Module
 const esm = merge({}, config, {
     output: {
-        file  : config.output.file.replace(/\.js$/, '.es.js'),
+        file  : config.output.file.replace(/\.js$/, '.esm.js'),
         format: 'es'
     },
     plugins: [

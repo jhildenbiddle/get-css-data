@@ -116,4 +116,4 @@ function matchesSelector(e, t) {
 }
 
 export default getCss$1;
-//# sourceMappingURL=get-css-data.es.js.map
+//# sourceMappingURL=get-css-data.esm.js.map

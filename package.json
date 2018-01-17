@@ -30,7 +30,7 @@
     "ie >= 9"
   ],
   "main": "dist/get-css-data.js",
-  "module": "dist/get-css-data.es.js",
+  "module": "dist/get-css-data.esm.js",
   "unpkg": "dist/get-css-data.min.js",
   "scripts": {
     "prepare": "rimraf dist/* && npm run build",
