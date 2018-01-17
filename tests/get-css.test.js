@@ -136,7 +136,7 @@ describe('get-css', function() {
 
     it('returns CSS from single <link> node via CORS', function(done) {
         // Must be CORS-enabled link using same protocol (http://) for IE9
-        const linkUrl = 'http://cdn.jsdelivr.net/gh/jhildenbiddle/class-change@1.0.3/README.md';
+        const linkUrl = 'http://cdn.jsdelivr.net/npm/get-css-data@1.0.0/tests/fixtures/style1.css';
 
         axios.get(linkUrl)
             .then(response => response.data)
