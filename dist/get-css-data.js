@@ -5,113 +5,218 @@
  * (c) 2018 John Hildenbiddle <http://hildenbiddle.com>
  * MIT license
  */
-!function(e, t) {
-    "object" == typeof exports && "undefined" != typeof module ? module.exports = t() : "function" == typeof define && define.amd ? define(t) : e.getCssData = t();
-}(this, function() {
+(function(global, factory) {
+    typeof exports === "object" && typeof module !== "undefined" ? module.exports = factory() : typeof define === "function" && define.amd ? define(factory) : global.getCssData = factory();
+})(this, function() {
     "use strict";
-    function e(e) {
-        var t = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, o = {
-            mimeType: t.mimeType || null,
-            onComplete: t.onComplete || Function.prototype,
-            onError: t.onError || Function.prototype,
-            onSuccess: t.onSuccess || Function.prototype
-        }, n = Array.isArray(e) ? e : [ e ], r = Array.apply(null, Array(n.length)).map(function(e) {
+    function getUrls(urls) {
+        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        var settings = {
+            mimeType: options.mimeType || null,
+            onComplete: options.onComplete || Function.prototype,
+            onError: options.onError || Function.prototype,
+            onSuccess: options.onSuccess || Function.prototype
+        };
+        var urlArray = Array.isArray(urls) ? urls : [ urls ];
+        var urlQueue = Array.apply(null, Array(urlArray.length)).map(function(x) {
             return null;
         });
-        function c(e, t) {
-            o.onError(e, n[t], t);
+        function onError(xhr, urlIndex) {
+            settings.onError(xhr, urlArray[urlIndex], urlIndex);
         }
-        function i(e, t) {
-            r[t] = e, o.onSuccess(e, n[t], t), -1 === r.indexOf(null) && o.onComplete(r);
+        function onSuccess(responseText, urlIndex) {
+            urlQueue[urlIndex] = responseText;
+            settings.onSuccess(responseText, urlArray[urlIndex], urlIndex);
+            if (urlQueue.indexOf(null) === -1) {
+                settings.onComplete(urlQueue);
+            }
         }
-        n.forEach(function(e, t) {
-            var n = document.createElement("a");
-            n.setAttribute("href", e), n.href = n.href;
-            var r = n.host !== location.host, l = n.protocol === location.protocol;
-            if (r && "undefined" != typeof XDomainRequest) if (l) {
-                var s = new XDomainRequest();
-                s.open("GET", e), s.timeout = 0, s.onprogress = Function.prototype, s.ontimeout = Function.prototype, 
-                s.onload = function() {
-                    i(s.responseText, t);
-                }, s.onerror = function(e) {
-                    c(s, t);
-                }, setTimeout(function() {
-                    s.send();
-                }, 0);
-            } else console.log("Internet Explorer 9 Cross-Origin (CORS) requests must use the same protocol"), 
-            c(null, t); else {
-                var u = new XMLHttpRequest();
-                u.open("GET", e), o.mimeType && u.overrideMimeType && u.overrideMimeType(o.mimeType), 
-                u.onreadystatechange = function() {
-                    4 === u.readyState && (200 === u.status ? i(u.responseText, t) : c(u, t));
-                }, u.send();
+        urlArray.forEach(function(url, i) {
+            var parser = document.createElement("a");
+            parser.setAttribute("href", url);
+            parser.href = parser.href;
+            var isCrossDomain = parser.host !== location.host;
+            var isSameProtocol = parser.protocol === location.protocol;
+            if (isCrossDomain && typeof XDomainRequest !== "undefined") {
+                if (isSameProtocol) {
+                    var xdr = new XDomainRequest();
+                    xdr.open("GET", url);
+                    xdr.timeout = 0;
+                    xdr.onprogress = Function.prototype;
+                    xdr.ontimeout = Function.prototype;
+                    xdr.onload = function() {
+                        onSuccess(xdr.responseText, i);
+                    };
+                    xdr.onerror = function(err) {
+                        onError(xdr, i);
+                    };
+                    setTimeout(function() {
+                        xdr.send();
+                    }, 0);
+                } else {
+                    console.log("Internet Explorer 9 Cross-Origin (CORS) requests must use the same protocol");
+                    onError(null, i);
+                }
+            } else {
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", url);
+                if (settings.mimeType && xhr.overrideMimeType) {
+                    xhr.overrideMimeType(settings.mimeType);
+                }
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            onSuccess(xhr.responseText, i);
+                        } else {
+                            onError(xhr, i);
+                        }
+                    }
+                };
+                xhr.send();
             }
         });
     }
-    function t(e) {
-        var t = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : location.href, o = document.implementation.createHTMLDocument(""), n = o.createElement("base"), r = o.createElement("a");
-        return o.head.appendChild(n), o.body.appendChild(r), n.href = t, r.href = e, r.href;
-    }
-    return function(o) {
-        var n = {
-            cssComments: /\/\*[\s\S]+?\*\//gm,
-            cssImports: /(?:@import\s*)(?:url\(\s*)?(?:['"])([\w\-./ ]*)(?:['"])(?:\s*\))?(?:[^;]*;)/gim
-        }, r = {
-            include: o.include || 'style,link[rel="stylesheet"]',
-            exclude: o.exclude || null,
-            filter: o.filter || null,
-            onComplete: o.onComplete || Function.prototype,
-            onError: o.onError || Function.prototype,
-            onSuccess: o.onSuccess || Function.prototype
-        }, c = Array.apply(null, document.querySelectorAll(r.include)).filter(function(e) {
-            return t = e, o = r.exclude, !(t.matches || t.matchesSelector || t.webkitMatchesSelector || t.mozMatchesSelector || t.msMatchesSelector || t.oMatchesSelector).call(t, o);
-            var t, o;
-        }), i = Array.apply(null, Array(c.length)).map(function(e) {
+    /**
+ * Gets CSS data from <style> and <link> nodes (including @imports), then
+ * returns data in order processed by DOM. Allows specifying nodes to
+ * include/exclude and filtering CSS data using RegEx.
+ *
+ * @preserve
+ * @param {object} [options={}] - The options object
+ * @param {string} options.include - CSS selector matching <link> and <style>
+ * nodes to include
+ * @param {string} options.exclude - CSS selector matching <link> and <style>
+ * nodes to exclude
+ * @param {object} options.filter - Regular expression used to filter node CSS
+ * data. Each block of CSS data is tested against the filter, and only matching
+ * data is included.
+ * @param {function} options.onComplete - Callback after all nodes have been
+ * processed. Passes concatenated CSS text and array of CSS text in DOM order as
+ * arguments.
+ * @param {function} options.onError - Callback on each error. Passes the XHR
+ * object for inspection, soure node reference, and the source URL that failed
+ * (either a <link> href or an @import) as arguments
+ * @param {function} options.onSuccess - Callback on each CSS node read. Passes
+ * CSS text, source node reference, and the source URL (either a <link> href or
+ * an import) as arguments.
+ * @example
+ *
+ *   getCssData({
+ *     include: 'style,link[rel="stylesheet"]', // default
+ *     exclude: '[href="skip.css"]',
+ *     filter : /red/,
+ *     onComplete(cssText, cssArray) {
+ *       // ...
+ *     },
+ *     onError(xhr, node, url) {
+ *       // ...
+ *     },
+ *     onSuccess(cssText, node, url) {
+ *       // ...
+ *     }
+ *   });
+ */    function getCssData(options) {
+        var regex = {
+            cssComments: /\/\*[\s\S]+?\*\//g,
+            cssImports: /(?:@import\s*)(?:url\(\s*)?(?:['"])([^'"]*)(?:['"])(?:\s*\))?(?:[^;]*;)/g
+        };
+        var settings = {
+            include: options.include || 'style,link[rel="stylesheet"]',
+            exclude: options.exclude || null,
+            filter: options.filter || null,
+            onComplete: options.onComplete || Function.prototype,
+            onError: options.onError || Function.prototype,
+            onSuccess: options.onSuccess || Function.prototype
+        };
+        var sourceNodes = Array.apply(null, document.querySelectorAll(settings.include)).filter(function(node) {
+            return !matchesSelector(node, settings.exclude);
+        });
+        var cssQueue = Array.apply(null, Array(sourceNodes.length)).map(function(x) {
             return null;
         });
-        function l() {
-            if (-1 === i.indexOf(null)) {
-                var e = i.join("");
-                r.onComplete(e, i);
+        function handleComplete() {
+            var isComplete = cssQueue.indexOf(null) === -1;
+            if (isComplete) {
+                var cssText = cssQueue.join("");
+                settings.onComplete(cssText, cssQueue);
             }
         }
-        function s(e, t, o, n) {
-            i[o] = "", r.onError(e, n, t), l();
+        function handleError(xhr, url, cssIndex, node) {
+            cssQueue[cssIndex] = "";
+            settings.onError(xhr, node, url);
+            handleComplete();
         }
-        function u(o, c, a, p, f) {
-            if (!r.filter || r.filter.test(o)) {
-                var m = r.onSuccess(o, a, f || p), d = (o = !1 === m ? "" : m || o).replace(n.cssComments, "").match(n.cssImports);
-                if (d) {
-                    var y = d.map(function(e) {
-                        return e.replace(n.cssImports, "$1");
+        function handleSuccess(cssText, cssIndex, node, sourceUrl, importUrl) {
+            if (!settings.filter || settings.filter.test(cssText)) {
+                var returnVal = settings.onSuccess(cssText, node, importUrl || sourceUrl);
+                cssText = returnVal === false ? "" : returnVal || cssText;
+                var importRules = cssText.replace(regex.cssComments, "").match(regex.cssImports);
+                if (importRules) {
+                    var importUrls = importRules.map(function(decl) {
+                        return decl.replace(regex.cssImports, "$1");
                     });
-                    e(y = y.map(function(e) {
-                        return t(e, p);
-                    }), {
-                        onError: function(e, t, o) {
-                            s(e, t, c, a);
+                    importUrls = importUrls.map(function(url) {
+                        return getFullUrl(url, sourceUrl);
+                    });
+                    getUrls(importUrls, {
+                        onError: function onError(xhr, url, urlIndex) {
+                            handleError(xhr, url, cssIndex, node);
                         },
-                        onSuccess: function(e, t, n) {
-                            var r = d[n], i = y[n];
-                            u(o.replace(r, e), c, a, t, i);
+                        onSuccess: function onSuccess(importText, url, urlIndex) {
+                            var importDecl = importRules[urlIndex];
+                            var importUrl = importUrls[urlIndex];
+                            var newCssText = cssText.replace(importDecl, importText);
+                            handleSuccess(newCssText, cssIndex, node, url, importUrl);
                         }
                     });
-                } else i[c] = o, l();
-            } else i[c] = "", l();
-        }
-        c.forEach(function(o, n) {
-            var r = o.getAttribute("href"), c = o.getAttribute("rel"), a = "LINK" === o.nodeName && r && c && "stylesheet" === c.toLowerCase(), p = "STYLE" === o.nodeName;
-            a ? e(r, {
-                mimeType: "text/css",
-                onError: function(e, t, r) {
-                    s(e, t, n, o);
-                },
-                onSuccess: function(e, c, i) {
-                    var l = t(r, location.href);
-                    u(e, n, o, l);
+                } else {
+                    cssQueue[cssIndex] = cssText;
+                    handleComplete();
                 }
-            }) : p ? u(o.textContent, n, o, location.href) : (i[n] = "", l());
+            } else {
+                cssQueue[cssIndex] = "";
+                handleComplete();
+            }
+        }
+        sourceNodes.forEach(function(node, i) {
+            var linkHref = node.getAttribute("href");
+            var linkRel = node.getAttribute("rel");
+            var isLink = node.nodeName === "LINK" && linkHref && linkRel && linkRel.toLowerCase() === "stylesheet";
+            var isStyle = node.nodeName === "STYLE";
+            if (isLink) {
+                getUrls(linkHref, {
+                    mimeType: "text/css",
+                    onError: function onError(xhr, url, urlIndex) {
+                        handleError(xhr, url, i, node);
+                    },
+                    onSuccess: function onSuccess(cssText, url, urlIndex) {
+                        var sourceUrl = getFullUrl(linkHref, location.href);
+                        handleSuccess(cssText, i, node, sourceUrl);
+                    }
+                });
+            } else if (isStyle) {
+                handleSuccess(node.textContent, i, node, location.href);
+            } else {
+                cssQueue[i] = "";
+                handleComplete();
+            }
         });
-    };
+    }
+    function getFullUrl(url) {
+        var base = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : location.href;
+        var d = document.implementation.createHTMLDocument("");
+        var b = d.createElement("base");
+        var a = d.createElement("a");
+        d.head.appendChild(b);
+        d.body.appendChild(a);
+        b.href = base;
+        a.href = url;
+        return a.href;
+    }
+    function matchesSelector(elm, selector) {
+        var matches = elm.matches || elm.matchesSelector || elm.webkitMatchesSelector || elm.mozMatchesSelector || elm.msMatchesSelector || elm.oMatchesSelector;
+        return matches.call(elm, selector);
+    }
+    return getCssData;
 });
 //# sourceMappingURL=get-css-data.js.map

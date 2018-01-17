@@ -10,30 +10,27 @@ import getUrls  from './get-urls';
  * returns data in order processed by DOM. Allows specifying nodes to
  * include/exclude and filtering CSS data using RegEx.
  *
- * @param {getCssOptions} [options={}] - The options object
- */
-/**
- * @typedef getCssOptions
- * @type {object}
- * @property {string} include - CSS selector matching <link> and <style> nodes
- * to include
- * @property {string} exclude - CSS selector matching <link> and <style> nodes
- * to exclude
- * @property {object} filter - Regular expression used to filter node CSS data.
- * Each block of CSS data is tested against the filter, and only matching data
- * is included.
- * @property {function} onComplete - Callback after all nodes have been
- * processed. Passes concatenated CSS text and array of CSS text in DOM order
- * as arguments.
- * @property {function} onError - Callback on each error. Passes the XHR object
- * for inspection, soure node reference, and the source URL that failed (either
- * a <link> href or an @import) as arguments
- * @property {function} onSuccess - Callback on each CSS node read. Passes CSS
- * text, source node reference, and the source URL (either a <link> href or an
- * import) as arguments.
+ * @preserve
+ * @param {object} [options={}] - The options object
+ * @param {string} options.include - CSS selector matching <link> and <style>
+ * nodes to include
+ * @param {string} options.exclude - CSS selector matching <link> and <style>
+ * nodes to exclude
+ * @param {object} options.filter - Regular expression used to filter node CSS
+ * data. Each block of CSS data is tested against the filter, and only matching
+ * data is included.
+ * @param {function} options.onComplete - Callback after all nodes have been
+ * processed. Passes concatenated CSS text and array of CSS text in DOM order as
+ * arguments.
+ * @param {function} options.onError - Callback on each error. Passes the XHR
+ * object for inspection, soure node reference, and the source URL that failed
+ * (either a <link> href or an @import) as arguments
+ * @param {function} options.onSuccess - Callback on each CSS node read. Passes
+ * CSS text, source node reference, and the source URL (either a <link> href or
+ * an import) as arguments.
  * @example
  *
- *   getCss({
+ *   getCssData({
  *     include: 'style,link[rel="stylesheet"]', // default
  *     exclude: '[href="skip.css"]',
  *     filter : /red/,
@@ -43,17 +40,17 @@ import getUrls  from './get-urls';
  *     onError(xhr, node, url) {
  *       // ...
  *     },
-  *    onSuccess(cssText, node, url) {
+ *     onSuccess(cssText, node, url) {
  *       // ...
  *     }
  *   });
  */
-function getCss(options) {
+function getCssData(options) {
     const regex = {
         // CSS comments
-        cssComments: /\/\*[\s\S]+?\*\//gm,
+        cssComments: /\/\*[\s\S]+?\*\//g,
         // CSS @import rules ($1: url)
-        cssImports : /(?:@import\s*)(?:url\(\s*)?(?:['"])([\w\-./ ]*)(?:['"])(?:\s*\))?(?:[^;]*;)/igm
+        cssImports : /(?:@import\s*)(?:url\(\s*)?(?:['"])([^'"]*)(?:['"])(?:\s*\))?(?:[^;]*;)/g
     };
     const settings = {
         include   : options.include    || 'style,link[rel="stylesheet"]',
@@ -232,4 +229,4 @@ function matchesSelector(elm, selector) {
 
 // Export
 // =============================================================================
-export default getCss;
+export default getCssData;

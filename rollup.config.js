@@ -46,9 +46,11 @@ const settings = {
     },
     uglify: {
         beautify: {
+            compress: false,
+            mangle  : false,
             output: {
                 beautify: true,
-                comments: /^!/
+                comments: /(?:^!|@(?:license|preserve))/
             }
         },
         minify: {
