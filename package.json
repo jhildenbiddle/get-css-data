@@ -1,0 +1,81 @@
+{
+  "name": "get-css-data",
+  "version": "0.0.1",
+  "description": "Collects stylesheet data from <link> and <style> nodes. Returns data in DOM order as a concatenated string of CSS and an array containing CSS for each node. Allows specifying nodes to include/exclude and filtering data using RegEx. Less than 1.5kb min+gzip and dependency-free.",
+  "author": "John Hildenbiddle <http://hildenbiddle.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/jhildenbiddle/get-css-data",
+  "repository": {
+    "type": "git",
+    "url": "git+https://jhildenbiddle@github.com/jhildenbiddle/get-css-data.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jhildenbiddle/get-css-data/issues"
+  },
+  "keywords": [
+    "ajax",
+    "css",
+    "es6",
+    "filter",
+    "import",
+    "javascript",
+    "js",
+    "link",
+    "module",
+    "style",
+    "stylesheet",
+    "xhr"
+  ],
+  "browserslist": [
+    "ie >= 9"
+  ],
+  "main": "dist/get-css-data.js",
+  "module": "dist/get-css-data.es.js",
+  "unpkg": "dist/get-css-data.min.js",
+  "scripts": {
+    "prepare": "rimraf dist/* && npm run build",
+    "build": "rollup -c",
+    "start": "rimraf coverage/* dist/* && npm run build -- --watch",
+    "test": "rimraf coverage/* && karma start",
+    "test-watch": "npm test -- --auto-watch --no-single-run",
+    "test-remote": "npm test -- --remote",
+    "preversion": "npm test",
+    "version": "npm run build && git add -A dist"
+  },
+  "devDependencies": {
+    "axios": "^0.17.1",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-plugin-istanbul": "^4.1.5",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "chai": "^4.1.2",
+    "create-elms": "^1.0.3",
+    "eslint": "^4.12.1",
+    "eslint-plugin-chai-expect": "^1.1.1",
+    "eslint-plugin-mocha": "^4.11.0",
+    "karma": "^2.0.0",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-coverage": "^1.1.1",
+    "karma-eslint": "^2.2.0",
+    "karma-mocha": "^1.3.0",
+    "karma-mocha-reporter": "^2.2.5",
+    "karma-sauce-launcher": "^1.2.0",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-webpack": "^2.0.6",
+    "lodash.merge": "^4.6.0",
+    "mocha": "^4.0.1",
+    "rimraf": "^2.6.2",
+    "rollup": "^0.53.3",
+    "rollup-plugin-babel": "^3.0.2",
+    "rollup-plugin-commonjs": "^8.2.6",
+    "rollup-plugin-eslint": "^4.0.0",
+    "rollup-plugin-json": "^2.3.0",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-uglify": "^2.0.1",
+    "uglify-es": "^3.3.4",
+    "webpack": "^3.10.0"
+  }
+}
