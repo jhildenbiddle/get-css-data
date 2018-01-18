@@ -1,9 +1,9 @@
 // Dependencies
 // =============================================================================
-import getUrls  from './get-urls';
+import getUrls from './get-urls';
 
 
-// Functions
+// Functions (Public)
 // =============================================================================
 /**
  * Gets CSS data from <style> and <link> nodes (including @imports), then
@@ -63,8 +63,6 @@ function getCssData(options) {
     const sourceNodes = Array.apply(null, document.querySelectorAll(settings.include)).filter(node => !matchesSelector(node, settings.exclude));
     const cssQueue    = Array.apply(null, Array(sourceNodes.length)).map(x => null);
 
-    // Functions (Private)
-    // -------------------------------------------------------------------------
     /**
      * Handles the onComplete() callback after verifying that all CSS has been
      * processed.
@@ -157,41 +155,48 @@ function getCssData(options) {
         }
     }
 
-
     // Main
     // -------------------------------------------------------------------------
-    sourceNodes.forEach((node, i) => {
-        const linkHref = node.getAttribute('href');
-        const linkRel  = node.getAttribute('rel');
-        const isLink   = node.nodeName === 'LINK' && linkHref && linkRel && linkRel.toLowerCase() === 'stylesheet';
-        const isStyle  = node.nodeName === 'STYLE';
+    if (sourceNodes.length) {
+        sourceNodes.forEach((node, i) => {
+            const linkHref = node.getAttribute('href');
+            const linkRel  = node.getAttribute('rel');
+            const isLink   = node.nodeName === 'LINK' && linkHref && linkRel && linkRel.toLowerCase() === 'stylesheet';
+            const isStyle  = node.nodeName === 'STYLE';
 
-        if (isLink) {
-            getUrls(linkHref, {
-                mimeType: 'text/css',
-                onError(xhr, url, urlIndex) {
-                    handleError(xhr, url, i, node);
-                },
-                onSuccess(cssText, url, urlIndex) {
-                    // Convert relative linkHref to absolute url to use as
-                    // the base URL for @import statements.
-                    // const sourceUrl = new URLParse(linkHref, location.href).href;
-                    const sourceUrl = getFullUrl(linkHref, location.href);
+            if (isLink) {
+                getUrls(linkHref, {
+                    mimeType: 'text/css',
+                    onError(xhr, url, urlIndex) {
+                        handleError(xhr, url, i, node);
+                    },
+                    onSuccess(cssText, url, urlIndex) {
+                        // Convert relative linkHref to absolute url to use as
+                        // the base URL for @import statements.
+                        // const sourceUrl = new URLParse(linkHref, location.href).href;
+                        const sourceUrl = getFullUrl(linkHref, location.href);
 
-                    handleSuccess(cssText, i, node, sourceUrl);
-                }
-            });
-        }
-        else if (isStyle) {
-            handleSuccess(node.textContent, i, node, location.href);
-        }
-        else {
-            cssQueue[i] = '';
-            handleComplete();
-        }
-    });
+                        handleSuccess(cssText, i, node, sourceUrl);
+                    }
+                });
+            }
+            else if (isStyle) {
+                handleSuccess(node.textContent, i, node, location.href);
+            }
+            else {
+                cssQueue[i] = '';
+                handleComplete();
+            }
+        });
+    }
+    else {
+        settings.onComplete('', []);
+    }
 }
 
+
+// Functions (Private)
+// =============================================================================
 /**
  * Returns fully qualified URL from relative URL and (optional) base URL
  *

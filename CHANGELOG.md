@@ -15,3 +15,9 @@
   or double quotes.
 - Unminified /dist files now include JSDOC comments from /src. This allows
   documentation to be displayed in IDEs.
+
+## 1.0.2 - 2018-01-17
+
+**Fixed**
+
+- onComplete callback now fires when zero elements are matched by 'include'.

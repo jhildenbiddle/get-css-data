@@ -271,6 +271,19 @@ describe('get-css', function() {
         });
     });
 
+    it('triggers onComplete callback with no matching <style> or <link> nodes', function(done) {
+        const testSelector = '[fail]';
+        const testElms     = document.querySelectorAll(testSelector);
+
+        getCss({
+            include: testSelector,
+            onComplete(cssText) {
+                expect(testElms.length).to.equal(0);
+                done();
+            }
+        });
+    });
+
 
     // Tests: Filters
     // -------------------------------------------------------------------------

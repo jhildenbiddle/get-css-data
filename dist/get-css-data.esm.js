@@ -175,29 +175,33 @@ function getUrls(urls) {
             handleComplete();
         }
     }
-    sourceNodes.forEach(function(node, i) {
-        var linkHref = node.getAttribute("href");
-        var linkRel = node.getAttribute("rel");
-        var isLink = node.nodeName === "LINK" && linkHref && linkRel && linkRel.toLowerCase() === "stylesheet";
-        var isStyle = node.nodeName === "STYLE";
-        if (isLink) {
-            getUrls(linkHref, {
-                mimeType: "text/css",
-                onError: function onError(xhr, url, urlIndex) {
-                    handleError(xhr, url, i, node);
-                },
-                onSuccess: function onSuccess(cssText, url, urlIndex) {
-                    var sourceUrl = getFullUrl(linkHref, location.href);
-                    handleSuccess(cssText, i, node, sourceUrl);
-                }
-            });
-        } else if (isStyle) {
-            handleSuccess(node.textContent, i, node, location.href);
-        } else {
-            cssQueue[i] = "";
-            handleComplete();
-        }
-    });
+    if (sourceNodes.length) {
+        sourceNodes.forEach(function(node, i) {
+            var linkHref = node.getAttribute("href");
+            var linkRel = node.getAttribute("rel");
+            var isLink = node.nodeName === "LINK" && linkHref && linkRel && linkRel.toLowerCase() === "stylesheet";
+            var isStyle = node.nodeName === "STYLE";
+            if (isLink) {
+                getUrls(linkHref, {
+                    mimeType: "text/css",
+                    onError: function onError(xhr, url, urlIndex) {
+                        handleError(xhr, url, i, node);
+                    },
+                    onSuccess: function onSuccess(cssText, url, urlIndex) {
+                        var sourceUrl = getFullUrl(linkHref, location.href);
+                        handleSuccess(cssText, i, node, sourceUrl);
+                    }
+                });
+            } else if (isStyle) {
+                handleSuccess(node.textContent, i, node, location.href);
+            } else {
+                cssQueue[i] = "";
+                handleComplete();
+            }
+        });
+    } else {
+        settings.onComplete("", []);
+    }
 }
 
 function getFullUrl(url) {
