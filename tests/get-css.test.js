@@ -67,7 +67,7 @@ describe('get-css', function() {
 
         getCss({
             include: 'style[data-test]',
-            onComplete(cssText, cssQueue) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(styleCss);
                 done();
             }
@@ -81,7 +81,7 @@ describe('get-css', function() {
 
         getCss({
             include: 'style[data-test]',
-            onComplete(cssText, cssQueue) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(expected);
                 done();
             }
@@ -95,7 +95,7 @@ describe('get-css', function() {
 
         getCss({
             include: 'style[data-test]',
-            onComplete(cssText, cssQueue) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(expected);
                 done();
             }
@@ -109,7 +109,7 @@ describe('get-css', function() {
 
         getCss({
             include: 'style[data-test]',
-            onComplete(cssText, cssQueue) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(expected);
                 done();
             }
@@ -127,7 +127,7 @@ describe('get-css', function() {
 
         getCss({
             include: 'link[data-test]',
-            onComplete(cssText, cssQueue) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(expected);
                 done();
             }
@@ -145,7 +145,7 @@ describe('get-css', function() {
 
                 getCss({
                     include: 'link[data-test]',
-                    onComplete(cssText, cssQueue) {
+                    onComplete(cssText, cssArray, nodeArray) {
                         expect(cssText).to.equal(expected);
                         done();
                     }
@@ -160,7 +160,7 @@ describe('get-css', function() {
 
         getCss({
             include: 'link[data-test]',
-            onComplete(cssText, cssQueue) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(expected);
                 done();
             }
@@ -174,7 +174,7 @@ describe('get-css', function() {
 
         getCss({
             include: 'link[data-test]',
-            onComplete(cssText, cssQueue) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(expected);
                 done();
             }
@@ -188,7 +188,7 @@ describe('get-css', function() {
 
         getCss({
             include: 'link[data-test]',
-            onComplete(cssText, cssQueue) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(expected);
                 done();
             }
@@ -206,7 +206,7 @@ describe('get-css', function() {
 
         getCss({
             include: 'style[data-test]',
-            onComplete(cssText) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(onErrorCount).to.equal(styleElms.length);
                 done();
             },
@@ -224,7 +224,7 @@ describe('get-css', function() {
 
         getCss({
             include: 'style[data-test]',
-            onComplete(cssText) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(onSuccessCount).to.equal(styleElms.length);
                 done();
             },
@@ -243,7 +243,7 @@ describe('get-css', function() {
 
         getCss({
             include: 'link[data-test]',
-            onComplete(cssText) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(onErrorCount).to.equal(linkElms.length);
                 done();
             },
@@ -261,7 +261,7 @@ describe('get-css', function() {
 
         getCss({
             include: 'link[data-test]',
-            onComplete(cssText) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(onSuccessCount).to.equal(linkElms.length);
                 done();
             },
@@ -277,7 +277,7 @@ describe('get-css', function() {
 
         getCss({
             include: testSelector,
-            onComplete(cssText) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(testElms.length).to.equal(0);
                 done();
             }
@@ -290,16 +290,16 @@ describe('get-css', function() {
     it('detects all <link rel="stylesheet"> and <style> nodes by default', function(done) {
         const linkUrl   = '/base/tests/fixtures/style1.css';
         const styleCss  = fixtures['style1.css'];
-        const elms = Array.prototype.concat(
+        const elms      = Array.prototype.concat(
             createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`),
             createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`, { appendTo: 'body' }),
             createElmsWrap(`<style>${styleCss}</style>`),
             createElmsWrap(`<style>${styleCss}</style>`, { appendTo: 'body' })
         );
-        const expected = styleCss.repeat(elms.length);
+        const expected  = styleCss.repeat(elms.length);
 
         getCss({
-            onComplete(cssText) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(expected);
                 done();
             }
@@ -316,7 +316,7 @@ describe('get-css', function() {
         getCss({
             include: '[data-test]',
             exclude: 'link',
-            onComplete(cssText) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(styleCss);
                 done();
             }
@@ -333,7 +333,7 @@ describe('get-css', function() {
         getCss({
             include: '[data-test]',
             filter : /keepme/,
-            onComplete(cssText) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(styleCss);
                 done();
             }
@@ -349,7 +349,7 @@ describe('get-css', function() {
 
         getCss({
             include: '[data-test]',
-            onComplete(cssText) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal('');
                 done();
             },
@@ -369,7 +369,7 @@ describe('get-css', function() {
 
         getCss({
             include: '[data-test]',
-            onComplete(cssText) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(modifiedCss.repeat(2));
                 done();
             },
@@ -387,7 +387,7 @@ describe('get-css', function() {
 
         getCss({
             include: '[data-test]',
-            onComplete(cssText) {
+            onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(styleCss);
                 done();
             }

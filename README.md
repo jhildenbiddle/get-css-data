@@ -98,9 +98,10 @@ getCss({
     // ...
   },
   // Triggered when all nodes have been processed
-  onComplete(cssText, cssArray) {
+  onComplete(cssText, cssArray, nodeArray) {
     console.log(cssText); // 4
     console.log(cssArray); // 5
+    console.log(nodeArray); // 6
   }
 });
 
@@ -109,6 +110,7 @@ getCss({
 // 3 => 'p { color: green; }p { color: blue; }"
 // 4 => 'p { color: red; }p { color: green; }p { color: blue; }'
 // 5 => ['p { color: red; }', 'p { color: green; }p { color: blue; }']
+// 6 => [<linkElement>, <styleElement>]
 ```
 
 ## Usage
@@ -183,20 +185,23 @@ Callback after all nodes have been processed.
 - Type: `function`
 - Arguments:
   1. **cssText**: A `string` of concatenated CSS text
-  2. **cssArray**: An `array` of node CSS text in DOM order
+  2. **cssArray**: An `array` of CSS text blocks in DOM order. The node containing each CSS text block is available at the same **nodeArray** index.
+  3. **nodeArray**: An `array` of `<style>` and `<link>` nodes in DOM order. The CSS text for each node is available at the same **cssArray** index.
 
 **Example**
 
 ```javascript
 getCss({
-  onComplete(cssText, cssArray) {
+  onComplete(cssText, cssArray, nodeArray) {
     console.log(cssText); // 1
     console.log(cssArray); // 2
+    console.log(nodeArray); // 3
   }
 });
 
-// 4 => 'p { color: red; }p { color: green; }p { color: blue; }'
-// 5 => ['p { color: red; }', 'p { color: green; }p { color: blue; }']
+// 1 => 'p { color: red; }p { color: green; }p { color: blue; }'
+// 2 => ['p { color: red; }', 'p { color: green; }p { color: blue; }']
+// 3 => [<linkElement>, <styleElement>]
 ```
 
 ### options.onError

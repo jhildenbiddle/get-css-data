@@ -88,14 +88,14 @@ function getUrls(urls) {
  * data. Each block of CSS data is tested against the filter, and only matching
  * data is included.
  * @param {function} options.onComplete - Callback after all nodes have been
- * processed. Passes concatenated CSS text and array of CSS text in DOM order as
- * arguments.
- * @param {function} options.onError - Callback on each error. Passes the XHR
- * object for inspection, soure node reference, and the source URL that failed
- * (either a <link> href or an @import) as arguments
+ * processed. Passes 1) concatenated CSS text, 2) an array of CSS text in DOM
+ * order, and 3) an array of nodes in DOM order as arguments.
+ * @param {function} options.onError - Callback on each error. Passes 1) the XHR
+ * object for inspection, 2) soure node reference, and 3) the source URL that
+ * failed (either a <link> href or an @import) as arguments
  * @param {function} options.onSuccess - Callback on each CSS node read. Passes
- * CSS text, source node reference, and the source URL (either a <link> href or
- * an import) as arguments.
+ * 1) CSS text, 2) source node reference, and 3) the source URL (either a <link>
+ *    href or an import) as arguments.
  * @example
  *
  *   getCssData({
@@ -128,18 +128,19 @@ function getUrls(urls) {
     var sourceNodes = Array.apply(null, document.querySelectorAll(settings.include)).filter(function(node) {
         return !matchesSelector(node, settings.exclude);
     });
-    var cssQueue = Array.apply(null, Array(sourceNodes.length)).map(function(x) {
+    var cssArray = Array.apply(null, Array(sourceNodes.length)).map(function(x) {
         return null;
     });
     function handleComplete() {
-        var isComplete = cssQueue.indexOf(null) === -1;
+        var isComplete = cssArray.indexOf(null) === -1;
         if (isComplete) {
-            var cssText = cssQueue.join("");
-            settings.onComplete(cssText, cssQueue);
+            var cssText = cssArray.join("");
+            settings.onComplete(cssText, cssArray, sourceNodes);
         }
     }
-    function handleError(xhr, url, cssIndex, node) {
-        cssQueue[cssIndex] = "";
+    function handleError(xhr, node, url, cssIndex) {
+        var cssText = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : "";
+        cssArray[cssIndex] = cssText;
         settings.onError(xhr, node, url);
         handleComplete();
     }
@@ -157,7 +158,7 @@ function getUrls(urls) {
                 });
                 getUrls(importUrls, {
                     onError: function onError(xhr, url, urlIndex) {
-                        handleError(xhr, url, cssIndex, node);
+                        handleError(xhr, node, url, cssIndex, cssText);
                     },
                     onSuccess: function onSuccess(importText, url, urlIndex) {
                         var importDecl = importRules[urlIndex];
@@ -167,11 +168,11 @@ function getUrls(urls) {
                     }
                 });
             } else {
-                cssQueue[cssIndex] = cssText;
+                cssArray[cssIndex] = cssText;
                 handleComplete();
             }
         } else {
-            cssQueue[cssIndex] = "";
+            cssArray[cssIndex] = "";
             handleComplete();
         }
     }
@@ -185,7 +186,7 @@ function getUrls(urls) {
                 getUrls(linkHref, {
                     mimeType: "text/css",
                     onError: function onError(xhr, url, urlIndex) {
-                        handleError(xhr, url, i, node);
+                        handleError(xhr, node, url, i);
                     },
                     onSuccess: function onSuccess(cssText, url, urlIndex) {
                         var sourceUrl = getFullUrl(linkHref, location.href);
@@ -195,7 +196,7 @@ function getUrls(urls) {
             } else if (isStyle) {
                 handleSuccess(node.textContent, i, node, location.href);
             } else {
-                cssQueue[i] = "";
+                cssArray[i] = "";
                 handleComplete();
             }
         });

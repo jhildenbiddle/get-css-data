@@ -20,14 +20,14 @@ import getUrls from './get-urls';
  * data. Each block of CSS data is tested against the filter, and only matching
  * data is included.
  * @param {function} options.onComplete - Callback after all nodes have been
- * processed. Passes concatenated CSS text and array of CSS text in DOM order as
- * arguments.
- * @param {function} options.onError - Callback on each error. Passes the XHR
- * object for inspection, soure node reference, and the source URL that failed
- * (either a <link> href or an @import) as arguments
+ * processed. Passes 1) concatenated CSS text, 2) an array of CSS text in DOM
+ * order, and 3) an array of nodes in DOM order as arguments.
+ * @param {function} options.onError - Callback on each error. Passes 1) the XHR
+ * object for inspection, 2) soure node reference, and 3) the source URL that
+ * failed (either a <link> href or an @import) as arguments
  * @param {function} options.onSuccess - Callback on each CSS node read. Passes
- * CSS text, source node reference, and the source URL (either a <link> href or
- * an import) as arguments.
+ * 1) CSS text, 2) source node reference, and 3) the source URL (either a <link>
+ *    href or an import) as arguments.
  * @example
  *
  *   getCssData({
@@ -61,19 +61,19 @@ function getCssData(options) {
         onSuccess : options.onSuccess  || Function.prototype
     };
     const sourceNodes = Array.apply(null, document.querySelectorAll(settings.include)).filter(node => !matchesSelector(node, settings.exclude));
-    const cssQueue    = Array.apply(null, Array(sourceNodes.length)).map(x => null);
+    const cssArray    = Array.apply(null, Array(sourceNodes.length)).map(x => null);
 
     /**
      * Handles the onComplete() callback after verifying that all CSS has been
      * processed.
      */
     function handleComplete() {
-        const isComplete = cssQueue.indexOf(null) === -1;
+        const isComplete = cssArray.indexOf(null) === -1;
 
         if (isComplete) {
-            const cssText = cssQueue.join('');
+            const cssText = cssArray.join('');
 
-            settings.onComplete(cssText, cssQueue);
+            settings.onComplete(cssText, cssArray, sourceNodes);
         }
     }
 
@@ -85,8 +85,8 @@ function getCssData(options) {
      * @param {number} cssIndex
      * @param {object} node
      */
-    function handleError(xhr, url, cssIndex, node) {
-        cssQueue[cssIndex] = '';
+    function handleError(xhr, node, url, cssIndex, cssText = '') {
+        cssArray[cssIndex] = cssText;
 
         settings.onError(xhr, node, url);
 
@@ -94,15 +94,15 @@ function getCssData(options) {
     }
 
     /**
-     * Processes CSS text, updates cssQueue, and triggers handleComplete()
+     * Processes CSS text, updates cssArray, and triggers handleComplete()
      * 1. Tests CSS against (optional) RegEx filter
      * 2. Triggers onSuccess() callback and accepts modified cssText as return
      * 3. Detects and resolves @import rules
-     * 4. Inserts final CSS into cssQueue
+     * 4. Inserts final CSS into cssArray
      * 5. Triggers handleComplete() after processing is complete
      *
      * @param {string} cssText - CSS text to be processed
-     * @param {number} cssIndex - cssQueue index to store final CSS
+     * @param {number} cssIndex - cssArray index to store final CSS
      * @param {object} node - CSS source <link> or <style> node
      * @param {string} sourceUrl - The base URL for resolving relative @imports
      * @param {string} importUrl - The @import source URL (if applicable)
@@ -111,7 +111,7 @@ function getCssData(options) {
         // Filter: Pass
         if (!settings.filter || settings.filter.test(cssText)) {
             // Store the return value of the onSuccess callback. This allows
-            // modifying cssText before adding to cssQueue.
+            // modifying cssText before adding to cssArray.
             const returnVal = settings.onSuccess(cssText, node, importUrl || sourceUrl);
 
             // Set cssText to return value (if provided)
@@ -131,7 +131,7 @@ function getCssData(options) {
 
                 getUrls(importUrls, {
                     onError(xhr, url, urlIndex) {
-                        handleError(xhr, url, cssIndex, node);
+                        handleError(xhr, node, url, cssIndex, cssText);
                     },
                     onSuccess(importText, url, urlIndex) {
                         const importDecl = importRules[urlIndex];
@@ -144,13 +144,13 @@ function getCssData(options) {
             }
             // No @imports
             else {
-                cssQueue[cssIndex] = cssText;
+                cssArray[cssIndex] = cssText;
                 handleComplete();
             }
         }
         // Filter: Fail
         else {
-            cssQueue[cssIndex] = '';
+            cssArray[cssIndex] = '';
             handleComplete();
         }
     }
@@ -168,7 +168,7 @@ function getCssData(options) {
                 getUrls(linkHref, {
                     mimeType: 'text/css',
                     onError(xhr, url, urlIndex) {
-                        handleError(xhr, url, i, node);
+                        handleError(xhr, node, url, i);
                     },
                     onSuccess(cssText, url, urlIndex) {
                         // Convert relative linkHref to absolute url to use as
@@ -184,7 +184,7 @@ function getCssData(options) {
                 handleSuccess(node.textContent, i, node, location.href);
             }
             else {
-                cssQueue[i] = '';
+                cssArray[i] = '';
                 handleComplete();
             }
         });
