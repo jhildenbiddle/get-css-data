@@ -1,6 +1,6 @@
 {
   "name": "get-css-data",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Collects stylesheet data from <link> and <style> nodes. Returns data in DOM order as a concatenated string of CSS and an array containing CSS for each node. Allows specifying nodes to include/exclude and filtering data using RegEx. Less than 1.5kb min+gzip and dependency-free.",
   "author": "John Hildenbiddle <http://hildenbiddle.com>",
   "license": "MIT",
