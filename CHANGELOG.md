@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.1.1 - 2018-01-20
+
+**Changed**
+
+- Updated README.
+
 ## 1.1.0 - 2018-01-18
 
 **Added**
