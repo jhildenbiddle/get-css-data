@@ -1,10 +1,18 @@
 # Change Log
 
+## 1.1.2 - 2018-01-31
+
+**Changed**
+
+- Updated dev dependencies
+- Updated rollup configuration
+- Updated README
+
 ## 1.1.1 - 2018-01-20
 
 **Changed**
 
-- Updated README.
+- Updated README
 
 ## 1.1.0 - 2018-01-18
 
