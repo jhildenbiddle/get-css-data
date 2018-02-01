@@ -1,7 +1,7 @@
 {
   "name": "get-css-data",
   "version": "1.1.1",
-  "description": "Collects stylesheet data from <link> and <style> nodes. Returns data in DOM order as a concatenated string of CSS and an array containing CSS for each node. Allows specifying nodes to include/exclude and filtering data using RegEx. Less than 1.5kb min+gzip and dependency-free.",
+  "description": "A micro-library for collecting stylesheet data from link and style nodes",
   "author": "John Hildenbiddle <http://hildenbiddle.com>",
   "license": "MIT",
   "homepage": "https://github.com/jhildenbiddle/get-css-data",
@@ -51,8 +51,8 @@
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "chai": "^4.1.2",
-    "create-elms": "^1.0.3",
-    "eslint": "^4.12.1",
+    "create-elms": "^1.0.4",
+    "eslint": "^4.16.0",
     "eslint-plugin-chai-expect": "^1.1.1",
     "eslint-plugin-mocha": "^4.11.0",
     "karma": "^2.0.0",
@@ -68,14 +68,13 @@
     "lodash.merge": "^4.6.0",
     "mocha": "^4.0.1",
     "rimraf": "^2.6.2",
-    "rollup": "^0.53.3",
+    "rollup": "^0.55.2",
     "rollup-plugin-babel": "^3.0.2",
-    "rollup-plugin-commonjs": "^8.2.6",
+    "rollup-plugin-commonjs": "^8.3.0",
     "rollup-plugin-eslint": "^4.0.0",
     "rollup-plugin-json": "^2.3.0",
     "rollup-plugin-node-resolve": "^3.0.0",
-    "rollup-plugin-uglify": "^2.0.1",
-    "uglify-es": "^3.3.4",
+    "rollup-plugin-uglify": "^3.0.0",
     "webpack": "^3.10.0"
   }
 }
