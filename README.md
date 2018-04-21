@@ -258,6 +258,7 @@ getCss({
 
 - Create a [Github issue](https://github.com/jhildenbiddle/get-css-data/issues) for bug reports, feature requests, or questions
 - Follow [@jhildenbiddle](https://twitter.com/jhildenbiddle) for announcements
+- Add a [star on GitHub](https://github.com/jhildenbiddle/get-css-data) or [tweet](https%3A%2F%2Ftwitter.com%2Fintent%2Ftweet%3Ftext%3DA%20micro-library%20for%20collecting%20stylesheet%20data%20from%20link%20and%20style%20nodes%26url%3Dhttps%3A%2F%2Fgithub.com%2Fjhildenbiddle%2Fget-css-data%26hashtags%3Dcss%2Cdevelopers%2Cfrontend%2Cjavascript) to support the project!
 
 ## License
 
