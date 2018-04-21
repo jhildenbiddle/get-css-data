@@ -38,7 +38,9 @@ CDN ([unpkg.com](https://unpkg.com/) shown, also on [jsdelivr.net](https://www.j
 <!-- ES5 in file.html (latest v1.x.x) -->
 <script src="https://unpkg.com/get-css-data@1"></script>
 <script>
-  getCssData(...);
+  getCssData({
+    // options...
+  });
 </script>
 ```
 
@@ -46,14 +48,18 @@ CDN ([unpkg.com](https://unpkg.com/) shown, also on [jsdelivr.net](https://www.j
 <!-- ES6 module in file.html (latest v1.x.x) -->
 <script type="module">
   import getCssData from 'https://unpkg.com/get-css-data@1/dist/get-css-data.esm.min.js';
-  getCssData(...);
+  getCssData({
+    // options...
+  });
 </script>
 ```
 
 ```javascript
 // ES6 module in file.js (latest v1.x.x)
 import getCssData from 'https://unpkg.com/get-css-data@1/dist/get-css-data.esm.min.js';
-getCssData(...);
+getCssData({
+  // options...
+});
 ```
 
 ## Example
@@ -257,3 +263,4 @@ getCss({
 
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/jhildenbiddle/get-css-data/blob/master/LICENSE) for details.
 
+Copyright (c) 2018 John Hildenbiddle ([@jhildenbiddle](https://twitter.com/jhildenbiddle))
