@@ -27,9 +27,17 @@ NPM:
 npm install get-css-data
 ```
 
+```javascript
+// file.js
+import getCssData from 'get-css-data';
+getCssData({
+  // ...
+});
+```
+
 Git:
 
-```shell
+```bash
 git clone https://github.com/jhildenbiddle/get-css-data.git
 ```
 
@@ -40,7 +48,7 @@ CDN ([unpkg.com](https://unpkg.com/) shown, also on [jsdelivr.net](https://www.j
 <script src="https://unpkg.com/get-css-data@1"></script>
 <script>
   getCssData({
-    // options...
+    // ...
   });
 </script>
 ```
@@ -50,17 +58,9 @@ CDN ([unpkg.com](https://unpkg.com/) shown, also on [jsdelivr.net](https://www.j
 <script type="module">
   import getCssData from 'https://unpkg.com/get-css-data@1/dist/get-css-data.esm.min.js';
   getCssData({
-    // options...
+    // ...
   });
 </script>
-```
-
-```javascript
-// ES6 module in file.js (latest v1.x.x)
-import getCssData from 'https://unpkg.com/get-css-data@1/dist/get-css-data.esm.min.js';
-getCssData({
-  // options...
-});
 ```
 
 ## Example
