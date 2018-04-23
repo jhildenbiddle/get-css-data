@@ -51,7 +51,7 @@
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "chai": "^4.1.2",
-    "create-elms": "^1.0.5",
+    "create-elms": "^1.0.6",
     "eslint": "^4.19.1",
     "eslint-plugin-chai-expect": "^1.1.1",
     "eslint-plugin-mocha": "^5.0.0",

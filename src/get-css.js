@@ -78,80 +78,90 @@ function getCssData(options) {
     }
 
     /**
-     * Handles the onError callback for failed XMLHttpRequests
-     *
-     * @param {object} xhr
-     * @param {string} url
-     * @param {number} cssIndex
-     * @param {object} node
-     */
-    function handleError(xhr, node, url, cssIndex, cssText = '') {
-        cssArray[cssIndex] = cssText;
-
-        settings.onError(xhr, node, url);
-
-        handleComplete();
-    }
-
-    /**
      * Processes CSS text, updates cssArray, and triggers handleComplete()
-     * 1. Tests CSS against (optional) RegEx filter
-     * 2. Triggers onSuccess() callback and accepts modified cssText as return
-     * 3. Detects and resolves @import rules
-     * 4. Inserts final CSS into cssArray
-     * 5. Triggers handleComplete() after processing is complete
+     * 1. Passes CSS to resolveImports
+     * 2. Triggers onError() callback for each @import error
+     * 3. Tests resolved CSS against (optional) RegEx filter
+     * 4. Triggers onSuccess() callback and accepts modified cssText as return
+     * 5. Inserts final CSS into cssArray
+     * 6. Triggers handleComplete() after processing is complete
      *
      * @param {string} cssText - CSS text to be processed
      * @param {number} cssIndex - cssArray index to store final CSS
      * @param {object} node - CSS source <link> or <style> node
-     * @param {string} sourceUrl - The base URL for resolving relative @imports
-     * @param {string} importUrl - The @import source URL (if applicable)
+     * @param {string} sourceUrl - The URL containing the source node
      */
-    function handleSuccess(cssText, cssIndex, node, sourceUrl, importUrl) {
-        // Filter: Pass
-        if (!settings.filter || settings.filter.test(cssText)) {
-            // Store the return value of the onSuccess callback. This allows
-            // modifying cssText before adding to cssArray.
-            const returnVal = settings.onSuccess(cssText, node, importUrl || sourceUrl);
+    function handleSuccess(cssText, cssIndex, node, sourceUrl) {
+        resolveImports(cssText, sourceUrl, function(resolvedCssText, errorData) {
+            if (cssArray[cssIndex] === null) {
+                // Trigger onError for each error item
+                errorData.forEach(data => settings.onError(data.xhr, node, data.url));
 
-            // Set cssText to return value (if provided)
-            cssText = returnVal === false ? '' : returnVal || cssText;
+                // Filter: Pass
+                if (!settings.filter || settings.filter.test(resolvedCssText)) {
+                    // Store return value of the onSuccess callback. This allows
+                    // modifying resolvedCssText before adding to cssArray.
+                    const returnVal = settings.onSuccess(resolvedCssText, node, sourceUrl);
 
-            // Get @import rules from cssText. CSS comments are removed
-            // to avoid @import statements in comments from being processed.
-            const importRules = cssText.replace(regex.cssComments, '').match(regex.cssImports);
+                    // Store return value (if provided) or resolvedCssText
+                    cssArray[cssIndex] = returnVal === false ? '' : returnVal || resolvedCssText;
+                }
+                // Filter: Fail
+                else {
+                    cssArray[cssIndex] = '';
+                }
 
-            // Has @imports
-            if (importRules) {
-                let importUrls = importRules.map(decl => decl.replace(regex.cssImports, '$1'));
-
-                // Convert relative importUrls to absolute urls using
-                // sourceUrl as base.
-                importUrls = importUrls.map(url => getFullUrl(url, sourceUrl));
-
-                getUrls(importUrls, {
-                    onError(xhr, url, urlIndex) {
-                        handleError(xhr, node, url, cssIndex, cssText);
-                    },
-                    onSuccess(importText, url, urlIndex) {
-                        const importDecl = importRules[urlIndex];
-                        const importUrl  = importUrls[urlIndex];
-                        const newCssText = cssText.replace(importDecl, importText);
-
-                        handleSuccess(newCssText, cssIndex, node, url, importUrl);
-                    }
-                });
-            }
-            // No @imports
-            else {
-                cssArray[cssIndex] = cssText;
                 handleComplete();
             }
+        });
+    }
+
+    /**
+     * Recursively parses CSS for @import rules, fetches data for each import
+     * URL, replaces the @rule the fetched data, then returns the resolved CSS
+     * via a callback function.
+     *
+     * @param {string} cssText - CSS text to be processed
+     * @param {string} baseUrl - Base URL used to resolve relative @import URLs
+     * @param {function} callbackFn - Callback function to trigger on complete.
+     * Passes 1) the resolves CSS and 2) an array of error objects as arguments.
+     */
+    function resolveImports(cssText, baseUrl, callbackFn, __errorData = [], __errorRules = []) {
+        let importRules = cssText
+            // Remove comments to avoid processing @import in comments
+            .replace(regex.cssComments, '')
+            // Find all @import rules
+            .match(regex.cssImports);
+
+        // Remove rules found in __errorRules array
+        importRules = (importRules || []).filter(rule => __errorRules.indexOf(rule) === -1);
+
+        // Has @imports
+        if (importRules.length) {
+            const importUrls = importRules
+                // Get URLs from @import rules
+                .map(decl => decl.replace(regex.cssImports, '$1'))
+                // Convert to absolute urls
+                .map(url => getFullUrl(url, baseUrl));
+
+            getUrls(importUrls, {
+                onError(xhr, url, urlIndex) {
+                    __errorData.push({ xhr, url });
+                    __errorRules.push(importRules[urlIndex]);
+
+                    resolveImports(cssText, baseUrl, callbackFn, __errorData, __errorRules);
+                },
+                onSuccess(importText, url, urlIndex) {
+                    const importDecl = importRules[urlIndex];
+                    const newCssText = cssText.replace(importDecl, importText);
+
+                    resolveImports(newCssText, url, callbackFn, __errorData, __errorRules);
+                }
+            });
         }
-        // Filter: Fail
+        // No @imports
         else {
-            cssArray[cssIndex] = '';
-            handleComplete();
+            callbackFn(cssText, __errorData);
         }
     }
 
@@ -168,12 +178,12 @@ function getCssData(options) {
                 getUrls(linkHref, {
                     mimeType: 'text/css',
                     onError(xhr, url, urlIndex) {
-                        handleError(xhr, node, url, i);
+                        cssArray[i] = '';
+                        settings.onError(xhr, node, url);
+                        handleComplete();
                     },
                     onSuccess(cssText, url, urlIndex) {
-                        // Convert relative linkHref to absolute url to use as
-                        // the base URL for @import statements.
-                        // const sourceUrl = new URLParse(linkHref, location.href).href;
+                        // Convert relative linkHref to absolute url
                         const sourceUrl = getFullUrl(linkHref, location.href);
 
                         handleSuccess(cssText, i, node, sourceUrl);
