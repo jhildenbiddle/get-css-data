@@ -169,20 +169,31 @@
                 }
             });
         }
+        function parseImportData(cssText, baseUrl) {
+            var ignoreRules = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+            var importData = {};
+            importData.rules = (cssText.replace(regex.cssComments, "").match(regex.cssImports) || []).filter(function(rule) {
+                return ignoreRules.indexOf(rule) === -1;
+            });
+            importData.urls = importData.rules.map(function(rule) {
+                return rule.replace(regex.cssImports, "$1");
+            });
+            importData.absoluteUrls = importData.urls.map(function(url) {
+                return getFullUrl(url, baseUrl);
+            });
+            importData.absoluteRules = importData.rules.map(function(rule, i) {
+                var oldUrl = importData.urls[i];
+                var newUrl = getFullUrl(importData.absoluteUrls[i], baseUrl);
+                return rule.replace(oldUrl, newUrl);
+            });
+            return importData;
+        }
         function resolveImports(cssText, node, baseUrl, callbackFn) {
             var __errorData = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : [];
             var __errorRules = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : [];
-            var importRules = cssText.replace(regex.cssComments, "").match(regex.cssImports);
-            importRules = (importRules || []).filter(function(rule) {
-                return __errorRules.indexOf(rule) === -1;
-            });
-            if (importRules.length) {
-                var importUrls = importRules.map(function(decl) {
-                    return decl.replace(regex.cssImports, "$1");
-                }).map(function(url) {
-                    return getFullUrl(url, baseUrl);
-                });
-                getUrls(importUrls, {
+            var importData = parseImportData(cssText, baseUrl, __errorRules);
+            if (importData.rules.length) {
+                getUrls(importData.absoluteUrls, {
                     onBeforeSend: function onBeforeSend(xhr, url, urlIndex) {
                         settings.onBeforeSend(xhr, node, url);
                     },
@@ -191,13 +202,18 @@
                             xhr: xhr,
                             url: url
                         });
-                        __errorRules.push(importRules[urlIndex]);
+                        __errorRules.push(importData.rules[urlIndex]);
                         resolveImports(cssText, node, baseUrl, callbackFn, __errorData, __errorRules);
                     },
-                    onSuccess: function onSuccess(importText, url, urlIndex) {
-                        var importDecl = importRules[urlIndex];
-                        var newCssText = cssText.replace(importDecl, importText);
-                        resolveImports(newCssText, node, url, callbackFn, __errorData, __errorRules);
+                    onComplete: function onComplete(responseArray) {
+                        responseArray.forEach(function(importText, i) {
+                            var responseImportData = parseImportData(importText, importData.absoluteUrls[i], __errorRules);
+                            responseImportData.rules.forEach(function(rule, i) {
+                                importText = importText.replace(rule, responseImportData.absoluteRules[i]);
+                            });
+                            cssText = cssText.replace(importData.rules[i], importText);
+                        });
+                        resolveImports(cssText, node, baseUrl, callbackFn, __errorData, __errorRules);
                     }
                 });
             } else {
@@ -216,14 +232,14 @@
                         onBeforeSend: function onBeforeSend(xhr, url, urlIndex) {
                             settings.onBeforeSend(xhr, node, url);
                         },
+                        onSuccess: function onSuccess(cssText, url, urlIndex) {
+                            var sourceUrl = getFullUrl(linkHref, location.href);
+                            handleSuccess(cssText, i, node, sourceUrl);
+                        },
                         onError: function onError(xhr, url, urlIndex) {
                             cssArray[i] = "";
                             settings.onError(xhr, node, url);
                             handleComplete();
-                        },
-                        onSuccess: function onSuccess(cssText, url, urlIndex) {
-                            var sourceUrl = getFullUrl(linkHref, location.href);
-                            handleSuccess(cssText, i, node, sourceUrl);
                         }
                     });
                 } else if (isStyle) {

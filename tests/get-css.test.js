@@ -88,7 +88,7 @@ describe('get-css', function() {
         });
     });
 
-    it('returns CSS from multiple <style> nodes with flat @import', function(done) {
+    it('returns CSS from multiple <style> nodes with single @import in same directory', function(done) {
         const styleCss = '@import "/base/tests/fixtures/style2.css";';
         const styleElms = createElmsWrap(`<style>${styleCss}</style>`.repeat(2));
         const expected = fixtures['style2.out.css'].repeat(styleElms.length);
@@ -102,7 +102,7 @@ describe('get-css', function() {
         });
     });
 
-    it('returns CSS from multiple <style> nodes with nested @import', function(done) {
+    it('returns CSS from multiple <style> nodes with chained @imports in same directory', function(done) {
         const styleCss  = '@import "/base/tests/fixtures/style3.css";';
         const styleElms = createElmsWrap(`<style>${styleCss}</style>`.repeat(2));
         const expected  = fixtures['style3.out.css'].repeat(styleElms.length);
@@ -110,6 +110,22 @@ describe('get-css', function() {
         getCss({
             include: 'style[data-test]',
             onComplete(cssText, cssArray, nodeArray) {
+                expect(cssText).to.equal(expected);
+                done();
+            }
+        });
+    });
+
+    it('returns CSS from multiple <style> nodes with chained @imports in different directories', function(done) {
+        const styleCss = '@import "/base/tests/fixtures/a/import.css";';
+        const expected = fixtures['style1.css'].repeat(6);
+
+        createElmsWrap(`<style>${styleCss}</style>`.repeat(2));
+
+        getCss({
+            include: 'style[data-test]',
+            onComplete(cssText, cssArray, nodeArray) {
+                cssText = cssText.replace(/\n/g, '');
                 expect(cssText).to.equal(expected);
                 done();
             }
@@ -199,10 +215,9 @@ describe('get-css', function() {
     // Tests: Callbacks
     // -------------------------------------------------------------------------
     it('triggers onBeforeSend callback for each <style> node', function(done) {
-        const importUrl         = '/base/tests/fixtures/style3.css';
-        let   onBeforeSendCount = 0;
+        let onBeforeSendCount = 0;
 
-        createElmsWrap(`<style>@import "${importUrl}";</style>`);
+        createElmsWrap('<style>@import "/base/tests/fixtures/style1.css";@import "/base/tests/fixtures/style2.css";</style>');
 
         getCss({
             include: 'style[data-test]',
@@ -218,7 +233,7 @@ describe('get-css', function() {
 
     it('triggers onError callback for each <style> node', function(done) {
         const styleCss = '@import "fail.css";';
-        const styleElms = createElmsWrap(`<style>${styleCss}</style>`.repeat(2));
+        const styleElms = createElmsWrap(`<style>${styleCss}</style>`.repeat(3));
 
         let onErrorCount = 0;
 

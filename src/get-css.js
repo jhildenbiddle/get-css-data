@@ -127,6 +127,49 @@ function getCssData(options) {
     }
 
     /**
+     * Parses CSS and returns an object containing @import related data.
+     *
+     * @param {any} cssText CSS text to be processed
+     * @param {any} baseUrl Base URL used to resolve relative @import URLs
+     * @param {any} [ignoreRules=[]]
+     * @returns {object}
+     */
+    function parseImportData(cssText, baseUrl, ignoreRules = []) {
+        const importData = {};
+
+        // @import rules
+        // Ex: @import "file.css";
+        importData.rules = (cssText
+            // Remove comments to avoid processing @import in comments
+            .replace(regex.cssComments, '')
+            // Find all @import rules
+            .match(regex.cssImports)
+            // Force empty array if no match
+            || [])
+            // Remove rules found in ignoreRules array
+            .filter(rule => ignoreRules.indexOf(rule) === -1);
+
+        // @import urls
+        // Ex: file.css
+        importData.urls = importData.rules.map(rule => rule.replace(regex.cssImports, '$1'));
+
+        // Absolute @import urls
+        // Ex: /path/to/file.css
+        importData.absoluteUrls = importData.urls.map(url => getFullUrl(url, baseUrl));
+
+        // Absolute @import rules
+        // Ex: @import "/path/to/file.css";
+        importData.absoluteRules = importData.rules.map((rule, i) => {
+            const oldUrl = importData.urls[i];
+            const newUrl = getFullUrl(importData.absoluteUrls[i], baseUrl);
+
+            return rule.replace(oldUrl, newUrl);
+        });
+
+        return importData;
+    }
+
+    /**
      * Recursively parses CSS for @import rules, fetches data for each import
      * URL, replaces the @rule the fetched data, then returns the resolved CSS
      * via a callback function.
@@ -139,38 +182,33 @@ function getCssData(options) {
      *                   objects as arguments.
      */
     function resolveImports(cssText, node, baseUrl, callbackFn, __errorData = [], __errorRules = []) {
-        let importRules = cssText
-            // Remove comments to avoid processing @import in comments
-            .replace(regex.cssComments, '')
-            // Find all @import rules
-            .match(regex.cssImports);
-
-        // Remove rules found in __errorRules array
-        importRules = (importRules || []).filter(rule => __errorRules.indexOf(rule) === -1);
+        const importData = parseImportData(cssText, baseUrl, __errorRules);
 
         // Has @imports
-        if (importRules.length) {
-            const importUrls = importRules
-                // Get URLs from @import rules
-                .map(decl => decl.replace(regex.cssImports, '$1'))
-                // Convert to absolute urls
-                .map(url => getFullUrl(url, baseUrl));
-
-            getUrls(importUrls, {
+        if (importData.rules.length) {
+            getUrls(importData.absoluteUrls, {
                 onBeforeSend(xhr, url, urlIndex) {
                     settings.onBeforeSend(xhr, node, url);
                 },
                 onError(xhr, url, urlIndex) {
                     __errorData.push({ xhr, url });
-                    __errorRules.push(importRules[urlIndex]);
+                    __errorRules.push(importData.rules[urlIndex]);
 
                     resolveImports(cssText, node, baseUrl, callbackFn, __errorData, __errorRules);
                 },
-                onSuccess(importText, url, urlIndex) {
-                    const importDecl = importRules[urlIndex];
-                    const newCssText = cssText.replace(importDecl, importText);
+                onComplete(responseArray) {
+                    responseArray.forEach((importText, i) => {
+                        const responseImportData = parseImportData(importText, importData.absoluteUrls[i], __errorRules);
 
-                    resolveImports(newCssText, node, url, callbackFn, __errorData, __errorRules);
+                        // Replace relative @import rules with absolute rules
+                        responseImportData.rules.forEach((rule, i) => {
+                            importText = importText.replace(rule, responseImportData.absoluteRules[i]);
+                        });
+
+                        cssText = cssText.replace(importData.rules[i], importText);
+                    });
+
+                    resolveImports(cssText, node, baseUrl, callbackFn, __errorData, __errorRules);
                 }
             });
         }
@@ -195,16 +233,16 @@ function getCssData(options) {
                     onBeforeSend(xhr, url, urlIndex) {
                         settings.onBeforeSend(xhr, node, url);
                     },
-                    onError(xhr, url, urlIndex) {
-                        cssArray[i] = '';
-                        settings.onError(xhr, node, url);
-                        handleComplete();
-                    },
                     onSuccess(cssText, url, urlIndex) {
                         // Convert relative linkHref to absolute url
                         const sourceUrl = getFullUrl(linkHref, location.href);
 
                         handleSuccess(cssText, i, node, sourceUrl);
+                    },
+                    onError(xhr, url, urlIndex) {
+                        cssArray[i] = '';
+                        settings.onError(xhr, node, url);
+                        handleComplete();
                     }
                 });
             }
