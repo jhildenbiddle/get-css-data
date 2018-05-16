@@ -19,6 +19,9 @@ import getUrls from './get-urls';
  * @param {object}   [options.filter] Regular expression used to filter node CSS
  *                   data. Each block of CSS data is tested against the filter,
  *                   and only matching data is included.
+ * @param {function} [options.onBeforeSend] Callback before XHR is sent. Passes
+ *                   1) the XHR object, 2) source node reference, and 3) the
+ *                   source URL as arguments.
  * @param {function} [options.onSuccess] Callback on each CSS node read. Passes
  *                   1) CSS text, 2) source node reference, and 3) the source
  *                   URL as arguments.
@@ -37,6 +40,9 @@ import getUrls from './get-urls';
  *     include: 'style,link[rel="stylesheet"]', // default
  *     exclude: '[href="skip.css"]',
  *     filter : /red/,
+ *     onBeforeSend(xhr, node, url) {
+ *       // ...
+ *     }
  *     onSuccess(cssText, node, url) {
  *       // ...
  *     }
@@ -56,12 +62,13 @@ function getCssData(options) {
         cssImports : /(?:@import\s*)(?:url\(\s*)?(?:['"])([^'"]*)(?:['"])(?:\s*\))?(?:[^;]*;)/g
     };
     const settings = {
-        include   : options.include    || 'style,link[rel="stylesheet"]',
-        exclude   : options.exclude    || null,
-        filter    : options.filter     || null,
-        onComplete: options.onComplete || Function.prototype,
-        onError   : options.onError    || Function.prototype,
-        onSuccess : options.onSuccess  || Function.prototype
+        include     : options.include      || 'style,link[rel="stylesheet"]',
+        exclude     : options.exclude      || null,
+        filter      : options.filter       || null,
+        onBeforeSend: options.onBeforeSend || Function.prototype,
+        onSuccess   : options.onSuccess    || Function.prototype,
+        onError     : options.onError      || Function.prototype,
+        onComplete  : options.onComplete   || Function.prototype
     };
     const sourceNodes = Array.apply(null, document.querySelectorAll(settings.include)).filter(node => !matchesSelector(node, settings.exclude));
     const cssArray    = Array.apply(null, Array(sourceNodes.length)).map(x => null);
@@ -89,13 +96,13 @@ function getCssData(options) {
      * 5. Inserts final CSS into cssArray
      * 6. Triggers handleComplete() after processing is complete
      *
-     * @param {string} cssText - CSS text to be processed
-     * @param {number} cssIndex - cssArray index to store final CSS
-     * @param {object} node - CSS source <link> or <style> node
-     * @param {string} sourceUrl - The URL containing the source node
+     * @param {string} cssText CSS text to be processed
+     * @param {number} cssIndex cssArray index to store final CSS
+     * @param {object} node CSS source <link> or <style> node
+     * @param {string} sourceUrl The URL containing the source node
      */
     function handleSuccess(cssText, cssIndex, node, sourceUrl) {
-        resolveImports(cssText, sourceUrl, function(resolvedCssText, errorData) {
+        resolveImports(cssText, node, sourceUrl, function(resolvedCssText, errorData) {
             if (cssArray[cssIndex] === null) {
                 // Trigger onError for each error item
                 errorData.forEach(data => settings.onError(data.xhr, node, data.url));
@@ -124,12 +131,14 @@ function getCssData(options) {
      * URL, replaces the @rule the fetched data, then returns the resolved CSS
      * via a callback function.
      *
-     * @param {string} cssText - CSS text to be processed
-     * @param {string} baseUrl - Base URL used to resolve relative @import URLs
-     * @param {function} callbackFn - Callback function to trigger on complete.
-     * Passes 1) the resolves CSS and 2) an array of error objects as arguments.
+     * @param {string}   cssText CSS text to be processed
+     * @param {object}   node CSS source <link> or <style> node
+     * @param {string}   baseUrl Base URL used to resolve relative @import URLs
+     * @param {function} callbackFn Callback function to trigger on complete.
+     *                   Passes 1) the resolves CSS and 2) an array of error
+     *                   objects as arguments.
      */
-    function resolveImports(cssText, baseUrl, callbackFn, __errorData = [], __errorRules = []) {
+    function resolveImports(cssText, node, baseUrl, callbackFn, __errorData = [], __errorRules = []) {
         let importRules = cssText
             // Remove comments to avoid processing @import in comments
             .replace(regex.cssComments, '')
@@ -148,17 +157,20 @@ function getCssData(options) {
                 .map(url => getFullUrl(url, baseUrl));
 
             getUrls(importUrls, {
+                onBeforeSend(xhr, url, urlIndex) {
+                    settings.onBeforeSend(xhr, node, url);
+                },
                 onError(xhr, url, urlIndex) {
                     __errorData.push({ xhr, url });
                     __errorRules.push(importRules[urlIndex]);
 
-                    resolveImports(cssText, baseUrl, callbackFn, __errorData, __errorRules);
+                    resolveImports(cssText, node, baseUrl, callbackFn, __errorData, __errorRules);
                 },
                 onSuccess(importText, url, urlIndex) {
                     const importDecl = importRules[urlIndex];
                     const newCssText = cssText.replace(importDecl, importText);
 
-                    resolveImports(newCssText, url, callbackFn, __errorData, __errorRules);
+                    resolveImports(newCssText, node, url, callbackFn, __errorData, __errorRules);
                 }
             });
         }
@@ -180,6 +192,9 @@ function getCssData(options) {
             if (isLink) {
                 getUrls(linkHref, {
                     mimeType: 'text/css',
+                    onBeforeSend(xhr, url, urlIndex) {
+                        settings.onBeforeSend(xhr, node, url);
+                    },
                     onError(xhr, url, urlIndex) {
                         cssArray[i] = '';
                         settings.onError(xhr, node, url);
@@ -233,8 +248,8 @@ function getFullUrl(url, base = location.href) {
 /**
  * Ponyfill for native Element.matches method
  *
- * @param {object} elm - The element to test
- * @param {string} selector - The CSS selector to test against
+ * @param   {object} elm The element to test
+ * @param   {string} selector The CSS selector to test against
  * @returns {boolean}
  */
 function matchesSelector(elm, selector) {

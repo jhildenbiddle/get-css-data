@@ -26,6 +26,7 @@ A micro-library for collecting stylesheet data from link and style nodes.
 - Handles absolute and relative `@import` rules
 - Inspect, modify and/or filter CSS data from each node
 - Access CSS data as concatenated string or an array of per-node data in DOM order
+- Modify XHR object before each request
 - UMD and ES6 modules available
 - Compatible with modern and legacy browsers (IE9+)
 - Lightweight (less than 1.5k min+gzip) and dependency-free
@@ -122,6 +123,7 @@ getCss({
 - [include](#optionsinclude)
 - [exclude](#optionsexclude)
 - [filter](#optionsfilter)
+- [onBeforeSend](#optionsonbeforesend)
 - [onSuccess](#optionsonsuccess)
 - [onError](#optionsonerror)
 - [onComplete](#optionsoncomplete)
@@ -196,6 +198,31 @@ getCssData({
   // If not, ignore the CSS.
   filter: /\.myclass/,
   ...
+});
+```
+
+### options.onBeforeSend
+
+- Type: `function`
+- Arguments:
+  1. **xhr**: The XHR `object` containing details of the failed request
+  1. **node**: The source node `object` reference
+  1. **url**: The source URL `string` (`<link>` href or `@import` url)
+
+Callback before each [XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) (XHR) is sent. Allows modifying the XML object by setting properties, calling methods, or adding event handlers.
+
+**Example**
+
+```javascript
+getCss({
+  onBeforeSend(xhr, node, url) {
+    // Domain-specific XHR settings
+    if (/some-domain.com/.test(url)) {
+      xhr.withCredentials = true;
+      xhr.setRequestHeader("foo", "1");
+      xhr.setRequestHeader("bar", "2");
+    }
+  }
 });
 ```
 

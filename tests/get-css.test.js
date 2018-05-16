@@ -198,6 +198,24 @@ describe('get-css', function() {
 
     // Tests: Callbacks
     // -------------------------------------------------------------------------
+    it('triggers onBeforeSend callback for each <style> node', function(done) {
+        const importUrl         = '/base/tests/fixtures/style3.css';
+        let   onBeforeSendCount = 0;
+
+        createElmsWrap(`<style>@import "${importUrl}";</style>`);
+
+        getCss({
+            include: 'style[data-test]',
+            onBeforeSend(xhr, node, url) {
+                onBeforeSendCount++;
+            },
+            onComplete(cssText, cssArray, nodeArray) {
+                expect(onBeforeSendCount).to.equal(3);
+                done();
+            }
+        });
+    });
+
     it('triggers onError callback for each <style> node', function(done) {
         const styleCss = '@import "fail.css";';
         const styleElms = createElmsWrap(`<style>${styleCss}</style>`.repeat(2));
@@ -206,12 +224,12 @@ describe('get-css', function() {
 
         getCss({
             include: 'style[data-test]',
+            onError(xhr, node, url) {
+                onErrorCount++;
+            },
             onComplete(cssText, cssArray, nodeArray) {
                 expect(onErrorCount).to.equal(styleElms.length);
                 done();
-            },
-            onError(xhr, node, url) {
-                onErrorCount++;
             }
         });
     });
@@ -224,12 +242,12 @@ describe('get-css', function() {
 
         getCss({
             include: 'style[data-test]',
+            onSuccess(cssText, node, url) {
+                onSuccessCount++;
+            },
             onComplete(cssText, cssArray, nodeArray) {
                 expect(onSuccessCount).to.equal(styleElms.length);
                 done();
-            },
-            onSuccess(cssText, node, url) {
-                onSuccessCount++;
             }
         });
     });
@@ -243,12 +261,12 @@ describe('get-css', function() {
 
         getCss({
             include: 'link[data-test]',
+            onError(xhr, node, url) {
+                onErrorCount++;
+            },
             onComplete(cssText, cssArray, nodeArray) {
                 expect(onErrorCount).to.equal(linkElms.length);
                 done();
-            },
-            onError(xhr, node, url) {
-                onErrorCount++;
             }
         });
     });
@@ -261,12 +279,12 @@ describe('get-css', function() {
 
         getCss({
             include: 'link[data-test]',
+            onSuccess(cssText, node, url) {
+                onSuccessCount++;
+            },
             onComplete(cssText, cssArray, nodeArray) {
                 expect(onSuccessCount).to.equal(linkElms.length);
                 done();
-            },
-            onSuccess(cssText, node, url) {
-                onSuccessCount++;
             }
         });
     });
@@ -349,12 +367,12 @@ describe('get-css', function() {
 
         getCss({
             include: '[data-test]',
+            onSuccess(cssText, node, url) {
+                return false;
+            },
             onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal('');
                 done();
-            },
-            onSuccess(cssText, node, url) {
-                return false;
             }
         });
     });
@@ -369,12 +387,12 @@ describe('get-css', function() {
 
         getCss({
             include: '[data-test]',
+            onSuccess(cssText, node, url) {
+                return modifiedCss;
+            },
             onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(modifiedCss.repeat(2));
                 done();
-            },
-            onSuccess(cssText, node, url) {
-                return modifiedCss;
             }
         });
     });

@@ -13,9 +13,10 @@
         var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
         var settings = {
             mimeType: options.mimeType || null,
-            onComplete: options.onComplete || Function.prototype,
+            onBeforeSend: options.onBeforeSend || Function.prototype,
+            onSuccess: options.onSuccess || Function.prototype,
             onError: options.onError || Function.prototype,
-            onSuccess: options.onSuccess || Function.prototype
+            onComplete: options.onComplete || Function.prototype
         };
         var urlArray = Array.isArray(urls) ? urls : [ urls ];
         var urlQueue = Array.apply(null, Array(urlArray.length)).map(function(x) {
@@ -63,6 +64,7 @@
                 if (settings.mimeType && xhr.overrideMimeType) {
                     xhr.overrideMimeType(settings.mimeType);
                 }
+                settings.onBeforeSend(xhr, url, i);
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState === 4) {
                         if (xhr.status === 200) {
@@ -82,38 +84,47 @@
      * include/exclude and filtering CSS data using RegEx.
      *
      * @preserve
-     * @param {object} [options={}] - The options object
-     * @param {string} options.include - CSS selector matching <link> and <style>
-     * nodes to include
-     * @param {string} options.exclude - CSS selector matching <link> and <style>
-     * nodes to exclude
-     * @param {object} options.filter - Regular expression used to filter node CSS
-     * data. Each block of CSS data is tested against the filter, and only matching
-     * data is included.
-     * @param {function} options.onComplete - Callback after all nodes have been
-     * processed. Passes 1) concatenated CSS text, 2) an array of CSS text in DOM
-     * order, and 3) an array of nodes in DOM order as arguments.
-     * @param {function} options.onError - Callback on each error. Passes 1) the XHR
-     * object for inspection, 2) soure node reference, and 3) the source URL that
-     * failed (either a <link> href or an @import) as arguments
-     * @param {function} options.onSuccess - Callback on each CSS node read. Passes
-     * 1) CSS text, 2) source node reference, and 3) the source URL (either a <link>
-     *    href or an import) as arguments.
+     * @param {object}   [options] The options object
+     * @param {string}   [options.include] CSS selector matching <link> and <style>
+     *                   nodes to include
+     * @param {string}   [options.exclude] CSS selector matching <link> and <style>
+     *                   nodes to exclude
+     * @param {object}   [options.filter] Regular expression used to filter node CSS
+     *                   data. Each block of CSS data is tested against the filter,
+     *                   and only matching data is included.
+     * @param {function} [options.onBeforeSend] Callback before XHR is sent. Passes
+     *                   1) the XHR object, 2) source node reference, and 3) the
+     *                   source URL as arguments.
+     * @param {function} [options.onSuccess] Callback on each CSS node read. Passes
+     *                   1) CSS text, 2) source node reference, and 3) the source
+     *                   URL as arguments.
+     * @param {function} [options.onError] Callback on each error. Passes 1) the XHR
+     *                   object for inspection, 2) soure node reference, and 3) the
+     *                   source URL that failed (either a <link> href or an @import)
+     *                   as arguments
+     * @param {function} [options.onComplete] Callback after all nodes have been
+     *                   processed. Passes 1) concatenated CSS text, 2) an array of
+     *                   CSS text in DOM order, and 3) an array of nodes in DOM
+     *                   order as arguments.
+     *
      * @example
      *
      *   getCssData({
      *     include: 'style,link[rel="stylesheet"]', // default
      *     exclude: '[href="skip.css"]',
      *     filter : /red/,
-     *     onComplete(cssText, cssArray) {
+     *     onBeforeSend(xhr, node, url) {
      *       // ...
-     *     },
-     *     onError(xhr, node, url) {
-     *       // ...
-     *     },
+     *     }
      *     onSuccess(cssText, node, url) {
      *       // ...
      *     }
+     *     onError(xhr, node, url) {
+     *       // ...
+     *     },
+     *     onComplete(cssText, cssArray) {
+     *       // ...
+     *     },
      *   });
      */    function getCssData(options) {
         var regex = {
@@ -124,9 +135,10 @@
             include: options.include || 'style,link[rel="stylesheet"]',
             exclude: options.exclude || null,
             filter: options.filter || null,
-            onComplete: options.onComplete || Function.prototype,
+            onBeforeSend: options.onBeforeSend || Function.prototype,
+            onSuccess: options.onSuccess || Function.prototype,
             onError: options.onError || Function.prototype,
-            onSuccess: options.onSuccess || Function.prototype
+            onComplete: options.onComplete || Function.prototype
         };
         var sourceNodes = Array.apply(null, document.querySelectorAll(settings.include)).filter(function(node) {
             return !matchesSelector(node, settings.exclude);
@@ -142,7 +154,7 @@
             }
         }
         function handleSuccess(cssText, cssIndex, node, sourceUrl) {
-            resolveImports(cssText, sourceUrl, function(resolvedCssText, errorData) {
+            resolveImports(cssText, node, sourceUrl, function(resolvedCssText, errorData) {
                 if (cssArray[cssIndex] === null) {
                     errorData.forEach(function(data) {
                         return settings.onError(data.xhr, node, data.url);
@@ -157,9 +169,9 @@
                 }
             });
         }
-        function resolveImports(cssText, baseUrl, callbackFn) {
-            var __errorData = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
-            var __errorRules = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : [];
+        function resolveImports(cssText, node, baseUrl, callbackFn) {
+            var __errorData = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : [];
+            var __errorRules = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : [];
             var importRules = cssText.replace(regex.cssComments, "").match(regex.cssImports);
             importRules = (importRules || []).filter(function(rule) {
                 return __errorRules.indexOf(rule) === -1;
@@ -171,18 +183,21 @@
                     return getFullUrl(url, baseUrl);
                 });
                 getUrls(importUrls, {
+                    onBeforeSend: function onBeforeSend(xhr, url, urlIndex) {
+                        settings.onBeforeSend(xhr, node, url);
+                    },
                     onError: function onError(xhr, url, urlIndex) {
                         __errorData.push({
                             xhr: xhr,
                             url: url
                         });
                         __errorRules.push(importRules[urlIndex]);
-                        resolveImports(cssText, baseUrl, callbackFn, __errorData, __errorRules);
+                        resolveImports(cssText, node, baseUrl, callbackFn, __errorData, __errorRules);
                     },
                     onSuccess: function onSuccess(importText, url, urlIndex) {
                         var importDecl = importRules[urlIndex];
                         var newCssText = cssText.replace(importDecl, importText);
-                        resolveImports(newCssText, url, callbackFn, __errorData, __errorRules);
+                        resolveImports(newCssText, node, url, callbackFn, __errorData, __errorRules);
                     }
                 });
             } else {
@@ -198,6 +213,9 @@
                 if (isLink) {
                     getUrls(linkHref, {
                         mimeType: "text/css",
+                        onBeforeSend: function onBeforeSend(xhr, url, urlIndex) {
+                            settings.onBeforeSend(xhr, node, url);
+                        },
                         onError: function onError(xhr, url, urlIndex) {
                             cssArray[i] = "";
                             settings.onError(xhr, node, url);

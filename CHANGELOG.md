@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.3.0
+
+*2018-05-15*
+
+- Added `options.onBeforeSend` callback
+
 ## 1.2.0
 
 *2018-04-23*

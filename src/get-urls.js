@@ -4,22 +4,29 @@
  * Requests one-or-more URLs and returns array of data in order specified.
  * Provides callbacks error and success callbacks for each XMLHttpRequest.
  *
- * @param {array|string} url - Single URL or array of URLs to request
- * @param {object} [options] - Options object
- * @param {string} [options.mimeType] - Overrides MIME type returned by server
- * @param {function} [options.onComplete] - Callback after all xhr requests have
- * completed. Returns array of response text for each URL in order provided.
- * @param {function} [options.onError] - Callback on xhr error. Returns xhr
- * object, URL, and URL index.
- * @param {function} [options.onSuccess] - Callback on xhr success. Returns
- * xhr.responseText, URL, and URL index.
+ * @param {array|string} url Single URL or array of URLs to request
+ * @param {object}      [options] Options object
+ * @param {string}      [options.mimeType] Overrides MIME type returned by
+ *                      server
+ * @param {function}    [options.onBeforeSend] Callback before each request is
+ *                      sent. Passes 1) the xhr object, 2) the URL, and 3) the
+ *                      URL index as arguments.
+ * @param {function}    [options.onSuccess] Callback on xhr success. Passes 1)
+ *                      xhr response text, 2) the URL, and 3) the URL index as
+ *                      arguments.
+ * @param {function}    [options.onError] Callback on xhr error. Passes 1) the
+ *                      xhr object, 2) the URL, 3) the URL index as arguments.
+ * @param {function}    [options.onComplete] Callback after all requests have
+ *                      completed. Passes 1) an array of response text for each
+ *                      URL in order provided as an argument.
  */
 function getUrls(urls, options = {}) {
     const settings = {
-        mimeType  : options.mimeType   || null,
-        onComplete: options.onComplete || Function.prototype,
-        onError   : options.onError    || Function.prototype,
-        onSuccess : options.onSuccess  || Function.prototype
+        mimeType    : options.mimeType     || null,
+        onBeforeSend: options.onBeforeSend || Function.prototype,
+        onSuccess   : options.onSuccess    || Function.prototype,
+        onError     : options.onError      || Function.prototype,
+        onComplete  : options.onComplete   || Function.prototype
     };
     const urlArray = Array.isArray(urls) ? urls : [urls];
     const urlQueue = Array.apply(null, Array(urlArray.length)).map(x => null);
@@ -91,6 +98,8 @@ function getUrls(urls, options = {}) {
             if (settings.mimeType && xhr.overrideMimeType) {
                 xhr.overrideMimeType(settings.mimeType);
             }
+
+            settings.onBeforeSend(xhr, url, i);
 
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
