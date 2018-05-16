@@ -5,9 +5,20 @@
 [![Codacy grade](https://img.shields.io/codacy/grade/57eb5b1190054035bbc78ba24868742e.svg?style=flat-square)](https://www.codacy.com/app/jhildenbiddle/get-css-data?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jhildenbiddle/get-css-data&amp;utm_campaign=Badge_Grade)
 [![Codecov](https://img.shields.io/codecov/c/github/jhildenbiddle/get-css-data.svg?style=flat-square)](https://codecov.io/gh/jhildenbiddle/get-css-data)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://github.com/jhildenbiddle/get-css-data/blob/master/LICENSE)
-[![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=A%20micro-library%20for%20collecting%20stylesheet%20data%20from%20link%20and%20style%20nodes&url=https%3A%2F%2Fgithub.com%2Fjhildenbiddle%2Fget-css-data&via=jhildenbiddle&hashtags=css,developers,frontend,javascript)
+[![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?url=https%3A%2F%2Fgithub.com%2Fjhildenbiddle%2Fget-css-data&via=jhildenbiddle&hashtags=css,developers,frontend,javascript)
 
 A micro-library for collecting stylesheet data from link and style nodes.
+
+------
+
+- [Features](#features)
+- [Installation](#installation)
+- [Example](#example)
+- [Options](#options)
+- [Contact](#contact)
+- [License](#license)
+
+------
 
 ## Features
 
@@ -108,6 +119,13 @@ getCss({
 
 ## Options
 
+- [include](#optionsinclude)
+- [exclude](#optionsexclude)
+- [filter](#optionsfilter)
+- [onSuccess](#optionsonsuccess)
+- [onError](#optionsonerror)
+- [onComplete](#optionsoncomplete)
+
 **Example**
 
 ```javascript
@@ -186,12 +204,12 @@ getCssData({
 - Type: `function`
 - Arguments:
   1. **cssText**: A `string` of CSS text from `node` and `url`
-  2. **node**: The source node `object` reference
-  3. **url**: The source URL `string` (`<link>` href, `@import` url, or page url for `<style>` data)
+  1. **node**: The source node `object` reference
+  1. **url**: The source URL `string` (`<link>` href or page url for `<style>` data)
 
 Callback after CSS data has been collected from each node. Allows modifying the CSS data before it is added to the final output by returning any `string` value (or `false` to skip).
 
-Note that the order in which CSS data is "successfully" collected (thereby triggering this callback) is not guaranteed when `<link>`  nodes or `@import`  rules are being processed as this data is collected asynchronously. To access CSS data in DOM order, use [options.oncomplete](#optionsoncomplete).
+Note that the order in which CSS data is "successfully" collected (thereby triggering this callback) is not guaranteed when `<link>`  nodes or `@import`  rules are being processed as this data is collected asynchronously. To access CSS data in DOM order, use the `cssArray` argument passed to the [options.oncomplete](#optionsoncomplete) callback.
 
 **Example**
 
@@ -216,8 +234,8 @@ getCss({
 - Type: `function`
 - Arguments:
   1. **xhr**: The XHR `object` containing details of the failed request
-  2. **node**: The source node `object` reference
-  3. **url**: The source URL `string` (`<link>` href or `@import` url)
+  1. **node**: The source node `object` reference
+  1. **url**: The source URL `string` (`<link>` href or `@import` url)
 
 Callback after `<link>` or `@import` request has failed.
 
@@ -240,8 +258,8 @@ getCss({
 - Type: `function`
 - Arguments:
   1. **cssText**: A `string` of concatenated CSS text from all nodes in DOM order.
-  2. **cssArray**: An `array` of per-node CSS text in DOM order. The node containing each CSS text block is available at the same **nodeArray** index.
-  3. **nodeArray**: An `array` of processed `<style>` and `<link>` nodes in DOM order. The CSS text for each node is available at the same **cssArray** index.
+  1. **cssArray**: An `array` of per-node CSS text in DOM order. The node containing each CSS text block is available at the same **nodeArray** index.
+  1. **nodeArray**: An `array` of processed `<style>` and `<link>` nodes in DOM order. The CSS text for each node is available at the same **cssArray** index.
 
 Callback after CSS data has been collected from all nodes.
 
@@ -259,7 +277,7 @@ getCss({
 
 - Create a [Github issue](https://github.com/jhildenbiddle/get-css-data/issues) for bug reports, feature requests, or questions
 - Follow [@jhildenbiddle](https://twitter.com/jhildenbiddle) for announcements
-- Add a [star on GitHub](https://github.com/jhildenbiddle/get-css-data) or [tweet](https://twitter.com/intent/tweet?text=A%20micro-library%20for%20collecting%20stylesheet%20data%20from%20link%20and%20style%20nodes&url=https%3A%2F%2Fgithub.com%2Fjhildenbiddle%2Fget-css-data&via=jhildenbiddle&hashtags=css,developers,frontend,javascript) to support the project!
+- Add a [star on GitHub](https://github.com/jhildenbiddle/get-css-data) or [tweet](https://twitter.com/intent/tweet?url=https%3A%2F%2Fgithub.com%2Fjhildenbiddle%2Fget-css-data&via=jhildenbiddle&hashtags=css,developers,frontend,javascript) to support the project!
 
 ## License
 
