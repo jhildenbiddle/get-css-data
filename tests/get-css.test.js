@@ -66,7 +66,7 @@ describe('get-css', function() {
         createElmsWrap(`<style>${styleCss}</style>`);
 
         getCss({
-            include: 'style[data-test]',
+            include: '[data-test]',
             onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(styleCss);
                 done();
@@ -80,7 +80,7 @@ describe('get-css', function() {
         const expected  = styleCss.repeat(styleElms.length);
 
         getCss({
-            include: 'style[data-test]',
+            include: '[data-test]',
             onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(expected);
                 done();
@@ -94,7 +94,7 @@ describe('get-css', function() {
         const expected = fixtures['style2.out.css'].repeat(styleElms.length);
 
         getCss({
-            include: 'style[data-test]',
+            include: '[data-test]',
             onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(expected);
                 done();
@@ -108,7 +108,7 @@ describe('get-css', function() {
         const expected  = fixtures['style3.out.css'].repeat(styleElms.length);
 
         getCss({
-            include: 'style[data-test]',
+            include: '[data-test]',
             onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(expected);
                 done();
@@ -123,7 +123,7 @@ describe('get-css', function() {
         createElmsWrap(`<style>${styleCss}</style>`.repeat(2));
 
         getCss({
-            include: 'style[data-test]',
+            include: '[data-test]',
             onComplete(cssText, cssArray, nodeArray) {
                 cssText = cssText.replace(/\n/g, '');
                 expect(cssText).to.equal(expected);
@@ -142,7 +142,7 @@ describe('get-css', function() {
         createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`);
 
         getCss({
-            include: 'link[data-test]',
+            include: '[data-test]',
             onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(expected);
                 done();
@@ -160,7 +160,7 @@ describe('get-css', function() {
                 createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`);
 
                 getCss({
-                    include: 'link[data-test]',
+                    include: '[data-test]',
                     onComplete(cssText, cssArray, nodeArray) {
                         expect(cssText).to.equal(expected);
                         done();
@@ -175,7 +175,7 @@ describe('get-css', function() {
         const expected = fixtures['style1.css'].repeat(linkElms.length);
 
         getCss({
-            include: 'link[data-test]',
+            include: '[data-test]',
             onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(expected);
                 done();
@@ -189,7 +189,7 @@ describe('get-css', function() {
         const expected = fixtures['style2.out.css'].repeat(linkElms.length);
 
         getCss({
-            include: 'link[data-test]',
+            include: '[data-test]',
             onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(expected);
                 done();
@@ -203,7 +203,7 @@ describe('get-css', function() {
         const expected = fixtures['style3.out.css'].repeat(linkElms.length);
 
         getCss({
-            include: 'link[data-test]',
+            include: '[data-test]',
             onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(expected);
                 done();
@@ -214,36 +214,41 @@ describe('get-css', function() {
 
     // Tests: Callbacks
     // -------------------------------------------------------------------------
-    it('triggers onBeforeSend callback for each <style> node', function(done) {
+    it('triggers onBeforeSend callback for each @import', function(done) {
         let onBeforeSendCount = 0;
 
-        createElmsWrap('<style>@import "/base/tests/fixtures/style1.css";@import "/base/tests/fixtures/style2.css";</style>');
+        createElmsWrap({
+            tag : 'style',
+            text: '@import "/base/tests/fixtures/style1.css";@import "/base/tests/fixtures/style2.css";'
+        });
 
         getCss({
-            include: 'style[data-test]',
+            include: '[data-test]',
             onBeforeSend(xhr, node, url) {
                 onBeforeSendCount++;
             },
             onComplete(cssText, cssArray, nodeArray) {
-                expect(onBeforeSendCount).to.equal(3);
+                expect(onBeforeSendCount, '<link> count').to.equal(3);
                 done();
             }
         });
     });
 
-    it('triggers onError callback for each <style> node', function(done) {
-        const styleCss = '@import "fail.css";';
-        const styleElms = createElmsWrap(`<style>${styleCss}</style>`.repeat(3));
+    it('triggers onBeforeSend callback for each <link> node', function(done) {
+        let onBeforeSendCount = 0;
 
-        let onErrorCount = 0;
+        createElmsWrap({
+            tag : 'link',
+            attr: { rel: 'stylesheet', href: '/base/tests/fixtures/style1.css' }
+        });
 
         getCss({
-            include: 'style[data-test]',
-            onError(xhr, node, url) {
-                onErrorCount++;
+            include: '[data-test]',
+            onBeforeSend(xhr, node, url) {
+                onBeforeSendCount++;
             },
             onComplete(cssText, cssArray, nodeArray) {
-                expect(onErrorCount).to.equal(styleElms.length);
+                expect(onBeforeSendCount, '<link> count').to.equal(1);
                 done();
             }
         });
@@ -256,31 +261,15 @@ describe('get-css', function() {
         let onSuccessCount = 0;
 
         getCss({
-            include: 'style[data-test]',
+            include: '[data-test]',
             onSuccess(cssText, node, url) {
                 onSuccessCount++;
+
+                return '!';
             },
             onComplete(cssText, cssArray, nodeArray) {
-                expect(onSuccessCount).to.equal(styleElms.length);
-                done();
-            }
-        });
-    });
-
-
-    it('triggers onError callback for each <link> node', function(done) {
-        const linkUrl  = 'fail.css';
-        const linkElms = createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));
-
-        let onErrorCount = 0;
-
-        getCss({
-            include: 'link[data-test]',
-            onError(xhr, node, url) {
-                onErrorCount++;
-            },
-            onComplete(cssText, cssArray, nodeArray) {
-                expect(onErrorCount).to.equal(linkElms.length);
+                expect(cssText, 'return value').to.equal('!'.repeat(styleElms.length));
+                expect(onSuccessCount, 'onSuccess count').to.equal(styleElms.length);
                 done();
             }
         });
@@ -293,12 +282,51 @@ describe('get-css', function() {
         let onSuccessCount = 0;
 
         getCss({
-            include: 'link[data-test]',
+            include: '[data-test]',
             onSuccess(cssText, node, url) {
                 onSuccessCount++;
+
+                return '!';
             },
             onComplete(cssText, cssArray, nodeArray) {
-                expect(onSuccessCount).to.equal(linkElms.length);
+                expect(cssText, 'return value').to.equal('!'.repeat(linkElms.length));
+                expect(onSuccessCount, 'onSuccess count').to.equal(linkElms.length);
+                done();
+            }
+        });
+    });
+
+    it('triggers onError callback for each <style> node', function(done) {
+        const styleCss = '@import "fail.css";';
+        const styleElms = createElmsWrap(`<style>${styleCss}</style>`.repeat(3));
+
+        let onErrorCount = 0;
+
+        getCss({
+            include: '[data-test]',
+            onError(xhr, node, url) {
+                onErrorCount++;
+            },
+            onComplete(cssText, cssArray, nodeArray) {
+                expect(onErrorCount).to.equal(styleElms.length);
+                done();
+            }
+        });
+    });
+
+    it('triggers onError callback for each <link> node', function(done) {
+        const linkUrl  = 'fail.css';
+        const linkElms = createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));
+
+        let onErrorCount = 0;
+
+        getCss({
+            include: '[data-test]',
+            onError(xhr, node, url) {
+                onErrorCount++;
+            },
+            onComplete(cssText, cssArray, nodeArray) {
+                expect(onErrorCount).to.equal(linkElms.length);
                 done();
             }
         });

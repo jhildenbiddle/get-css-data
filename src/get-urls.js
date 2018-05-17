@@ -38,8 +38,10 @@ function getUrls(urls, options = {}) {
     }
 
     function onSuccess(responseText, urlIndex) {
+        const returnVal = settings.onSuccess(responseText, urlArray[urlIndex], urlIndex);
+
+        responseText = returnVal === false ? '' : returnVal || responseText;
         urlQueue[urlIndex] = responseText;
-        settings.onSuccess(responseText, urlArray[urlIndex], urlIndex);
 
         // Complete
         if (urlQueue.indexOf(null) === -1) {

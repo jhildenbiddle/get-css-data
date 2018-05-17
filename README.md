@@ -22,10 +22,11 @@ A micro-library for collecting stylesheet data from link and style nodes.
 
 ## Features
 
-- Collect CSS data for all `<link>` and `<style>` nodes or only those specified
-- Handles absolute and relative `@import` rules
+- Collects CSS data from `<link>` and `<style>` nodes
+- Returns CSS data in DOM order as an array and a concatenated string
+- Handles `@import` rules
+- Handles absolute and relative URLs
 - Inspect, modify and/or filter CSS data from each node
-- Access CSS data as concatenated string or an array of per-node data in DOM order
 - Modify XHR object before each request
 - UMD and ES6 modules available
 - Compatible with modern and legacy browsers (IE9+)
@@ -136,6 +137,9 @@ getCssData({
   include: 'link[rel=stylesheet],style',
   exclude: '',
   filter : '',
+  onBeforeSend(xhr, node, url) {
+    // ...
+  },
   onSuccess(cssText, node, url) {
     // ...
   },
@@ -232,26 +236,21 @@ getCss({
 - Arguments:
   1. **cssText**: A `string` of CSS text from `node` and `url`
   1. **node**: The source node `object` reference
-  1. **url**: The source URL `string` (`<link>` href or page url for `<style>` data)
+  1. **url**: The source URL `string` (`<link>` href, `@import` url, or page url for `<style>` data)
 
 Callback after CSS data has been collected from each node. Allows modifying the CSS data before it is added to the final output by returning any `string` value (or `false` to skip).
 
-Note that the order in which CSS data is "successfully" collected (thereby triggering this callback) is not guaranteed when `<link>`  nodes or `@import`  rules are being processed as this data is collected asynchronously. To access CSS data in DOM order, use the `cssArray` argument passed to the [options.oncomplete](#optionsoncomplete) callback.
+Note that the order in which `<link>` and `@import` CSS data is "successfully" collected (thereby triggering this callback) is not guaranteed as these requests are asynchronous. To access CSS data in DOM order, use the `cssArray` argument passed to the [options.oncomplete](#optionsoncomplete) callback.
 
 **Example**
 
 ```javascript
 getCss({
   onSuccess(cssText, node, url) {
-    // Skip any data not from this domain
-    if (url.indexOf(location.hostname) === -1) {
-      return false;
-    }
-    // Otherwise modify the CSS data
-    else {
-      const newCssText = cssText.replace(/color:\s*red\s;/g, 'color: blue;');
-      return newCssText
-    }
+    // Replace all instances of "color: red" with "color: blue"
+    const newCssText = cssText.replace(/color:\s*red\s;/g, 'color: blue;');
+
+    return newCssText;
   }
 });
 ```

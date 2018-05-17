@@ -22,8 +22,9 @@ function getUrls(urls) {
         settings.onError(xhr, urlArray[urlIndex], urlIndex);
     }
     function onSuccess(responseText, urlIndex) {
+        var returnVal = settings.onSuccess(responseText, urlArray[urlIndex], urlIndex);
+        responseText = returnVal === false ? "" : returnVal || responseText;
         urlQueue[urlIndex] = responseText;
-        settings.onSuccess(responseText, urlArray[urlIndex], urlIndex);
         if (urlQueue.indexOf(null) === -1) {
             settings.onComplete(urlQueue);
         }
@@ -151,14 +152,15 @@ function getUrls(urls) {
         }
     }
     function handleSuccess(cssText, cssIndex, node, sourceUrl) {
+        var returnVal = settings.onSuccess(cssText, node, sourceUrl);
+        cssText = returnVal === false ? "" : returnVal || cssText;
         resolveImports(cssText, node, sourceUrl, function(resolvedCssText, errorData) {
             if (cssArray[cssIndex] === null) {
                 errorData.forEach(function(data) {
                     return settings.onError(data.xhr, node, data.url);
                 });
                 if (!settings.filter || settings.filter.test(resolvedCssText)) {
-                    var returnVal = settings.onSuccess(resolvedCssText, node, sourceUrl);
-                    cssArray[cssIndex] = returnVal === false ? "" : returnVal || resolvedCssText;
+                    cssArray[cssIndex] = resolvedCssText;
                 } else {
                     cssArray[cssIndex] = "";
                 }
@@ -194,6 +196,15 @@ function getUrls(urls) {
                 onBeforeSend: function onBeforeSend(xhr, url, urlIndex) {
                     settings.onBeforeSend(xhr, node, url);
                 },
+                onSuccess: function onSuccess(cssText, url, urlIndex) {
+                    var returnVal = settings.onSuccess(cssText, node, url);
+                    cssText = returnVal === false ? "" : returnVal || cssText;
+                    var responseImportData = parseImportData(cssText, url, __errorRules);
+                    responseImportData.rules.forEach(function(rule, i) {
+                        cssText = cssText.replace(rule, responseImportData.absoluteRules[i]);
+                    });
+                    return cssText;
+                },
                 onError: function onError(xhr, url, urlIndex) {
                     __errorData.push({
                         xhr: xhr,
@@ -204,10 +215,6 @@ function getUrls(urls) {
                 },
                 onComplete: function onComplete(responseArray) {
                     responseArray.forEach(function(importText, i) {
-                        var responseImportData = parseImportData(importText, importData.absoluteUrls[i], __errorRules);
-                        responseImportData.rules.forEach(function(rule, i) {
-                            importText = importText.replace(rule, responseImportData.absoluteRules[i]);
-                        });
                         cssText = cssText.replace(importData.rules[i], importText);
                     });
                     resolveImports(cssText, node, baseUrl, callbackFn, __errorData, __errorRules);

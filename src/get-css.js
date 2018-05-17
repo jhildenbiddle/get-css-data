@@ -102,6 +102,10 @@ function getCssData(options) {
      * @param {string} sourceUrl The URL containing the source node
      */
     function handleSuccess(cssText, cssIndex, node, sourceUrl) {
+        const returnVal = settings.onSuccess(cssText, node, sourceUrl);
+
+        cssText = returnVal === false ? '' : returnVal || cssText;
+
         resolveImports(cssText, node, sourceUrl, function(resolvedCssText, errorData) {
             if (cssArray[cssIndex] === null) {
                 // Trigger onError for each error item
@@ -109,12 +113,7 @@ function getCssData(options) {
 
                 // Filter: Pass
                 if (!settings.filter || settings.filter.test(resolvedCssText)) {
-                    // Store return value of the onSuccess callback. This allows
-                    // modifying resolvedCssText before adding to cssArray.
-                    const returnVal = settings.onSuccess(resolvedCssText, node, sourceUrl);
-
-                    // Store return value (if provided) or resolvedCssText
-                    cssArray[cssIndex] = returnVal === false ? '' : returnVal || resolvedCssText;
+                    cssArray[cssIndex] = resolvedCssText;
                 }
                 // Filter: Fail
                 else {
@@ -190,6 +189,20 @@ function getCssData(options) {
                 onBeforeSend(xhr, url, urlIndex) {
                     settings.onBeforeSend(xhr, node, url);
                 },
+                onSuccess(cssText, url, urlIndex) {
+                    const returnVal = settings.onSuccess(cssText, node, url);
+
+                    cssText = returnVal === false ? '' : returnVal || cssText;
+
+                    const responseImportData = parseImportData(cssText, url, __errorRules);
+
+                    // Replace relative @import rules with absolute rules
+                    responseImportData.rules.forEach((rule, i) => {
+                        cssText = cssText.replace(rule, responseImportData.absoluteRules[i]);
+                    });
+
+                    return cssText;
+                },
                 onError(xhr, url, urlIndex) {
                     __errorData.push({ xhr, url });
                     __errorRules.push(importData.rules[urlIndex]);
@@ -198,13 +211,6 @@ function getCssData(options) {
                 },
                 onComplete(responseArray) {
                     responseArray.forEach((importText, i) => {
-                        const responseImportData = parseImportData(importText, importData.absoluteUrls[i], __errorRules);
-
-                        // Replace relative @import rules with absolute rules
-                        responseImportData.rules.forEach((rule, i) => {
-                            importText = importText.replace(rule, responseImportData.absoluteRules[i]);
-                        });
-
                         cssText = cssText.replace(importData.rules[i], importText);
                     });
 
