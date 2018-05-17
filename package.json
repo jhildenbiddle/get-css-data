@@ -1,6 +1,6 @@
 {
   "name": "get-css-data",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "A micro-library for collecting stylesheet data from link and style nodes",
   "author": "John Hildenbiddle <http://hildenbiddle.com>",
   "license": "MIT",
