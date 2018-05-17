@@ -1,16 +1,21 @@
 # Change Log
 
-## 1.3.0
+## 1.3.1
 
-*2018-05-15*
+*2018-05-16*
 
 - Added `options.onBeforeSend` callback
+- Fixed `@import` bug that caused duplicate requests to be sent when fetching
+  multiple imports in the same file
+- Fixed `@import` bug that caused requests to fail when fetching multiple
+  imports from different directories in the same file
 
 ## 1.2.0
 
 *2018-04-23*
 
-- Fixed bug that caused callbacks to be triggered for each `@import` statement in each `<link>` or `<style>` node.
+- Fixed bug that caused callbacks to be triggered for each `@import` statement
+  in each `<link>` or `<style>` node.
 
 ## 1.1.4/1.1.5
 
@@ -56,7 +61,7 @@
 
 *2018-01-17*
 
-- Fixed: onComplete callback now fire when zero elements are matched by
+- Fixed: onComplete callback now fires when zero elements are matched by
   `options.include`.
 
 ## 1.0.1
