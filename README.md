@@ -37,7 +37,7 @@ A micro-library for collecting stylesheet data from link and style nodes.
 NPM:
 
 ```shell
-npm install get-css-data
+npm install get-css-data --save
 ```
 
 ```javascript
@@ -124,6 +124,7 @@ getCss({
 - [include](#optionsinclude)
 - [exclude](#optionsexclude)
 - [filter](#optionsfilter)
+- [parseRuntime](#optionsparseruntime)
 - [onBeforeSend](#optionsonbeforesend)
 - [onSuccess](#optionsonsuccess)
 - [onError](#optionsonerror)
@@ -166,7 +167,6 @@ getCssData({
   // Include only <link rel="stylesheet"> nodes
   // with an href that does not contains "bootstrap"
   include: 'link[rel=stylesheet]:not([href*=bootstrap])',
-  ...
 });
 ```
 
@@ -183,7 +183,6 @@ getCssData({
   // Of matched `include` nodes, exclude any node
   // with an href that contains "bootstrap"
   exclude: '[href*=bootstrap]',
-  ...
 });
 ```
 
@@ -201,7 +200,25 @@ getCssData({
   // of ".myclass". If found, process the CSS.
   // If not, ignore the CSS.
   filter: /\.myclass/,
-  ...
+});
+```
+
+### options.parseRuntime
+
+- Type: `boolean`
+- Default: `false`
+
+Determines how CSS data will be collected from `<style>` nodes.
+
+When `false`, CSS data is collected from each `<style>` node by reading its `textContent` value. When `true`, CSS data is collected from runtime values by iterating over the [`CSSRuleList`](https://developer.mozilla.org/en-US/docs/Web/API/CSSRuleList) object and concatenating all [`CSSRule.cssText`](https://developer.mozilla.org/en-US/docs/Web/API/CSSRule/cssText) values into a single string.
+
+Collecting data from runtime values is substantially slower, but it is necessary to obtain accurate CSS data when a stylesheet has been modified using the [`deleteRule()`](https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/deleteRule) or [`insertRule()`](https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/insertRule) methods because these modifications aren't reflected in the `textContent` value.
+
+**Example**
+
+```javascript
+getCssData({
+  parseRuntime: false // default
 });
 ```
 
