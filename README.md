@@ -135,9 +135,10 @@ getCss({
 ```javascript
 // Default values shown
 getCssData({
-  include: 'link[rel=stylesheet],style',
-  exclude: '',
-  filter : '',
+  include     : 'link[rel=stylesheet],style',
+  exclude     : '',
+  filter      : '',
+  parseRuntime: false,
   onBeforeSend(xhr, node, url) {
     // ...
   },
