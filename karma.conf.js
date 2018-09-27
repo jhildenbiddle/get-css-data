@@ -22,6 +22,7 @@ const localConfig = {
     ],
     files: [
         'node_modules/babel-polyfill/dist/polyfill.js',
+        'node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js',
         files.test,
         // Serve files for accessing in tests via AJAX
         // Ex: /base/[files.serve]/path/to/file
@@ -50,6 +51,7 @@ const localConfig = {
                             }]
                         ],
                         plugins: [
+                            'transform-custom-element-classes',
                             ['istanbul', {
                                 exclude: ['**/*.test.js']
                             }]

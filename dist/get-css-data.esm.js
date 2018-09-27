@@ -90,12 +90,14 @@ function getUrls(urls) {
  * @param {object}   [options.filter] Regular expression used to filter node CSS
  *                   data. Each block of CSS data is tested against the filter,
  *                   and only matching data is included.
- * @param {object}   [options.parseRuntime=false] Determines if CSS data will
- *                   be collected from a stylesheet's runtime values instead of
- *                   its text content. This is required to get accurate CSS data
+ * @param {object}   [options.parseRuntime=false] Determines if CSS data will be
+ *                   collected from a stylesheet's runtime values instead of its
+ *                   text content. This is required to get accurate CSS data
  *                   when a stylesheet has been modified using the deleteRule()
  *                   or insertRule() methods because these modifications will
  *                   not be reflected in the stylesheet's text content.
+ * @param {object}   [options.rootElement=document] Root element to traverse for
+ *                   <link> and <style> nodes.
  * @param {function} [options.onBeforeSend] Callback before XHR is sent. Passes
  *                   1) the XHR object, 2) source node reference, and 3) the
  *                   source URL as arguments.
@@ -117,6 +119,8 @@ function getUrls(urls) {
  *     include: 'style,link[rel="stylesheet"]', // default
  *     exclude: '[href="skip.css"]',
  *     filter : /red/,
+ *     parseRuntime: false, // default
+ *     rootElement: document, //default
  *     onBeforeSend(xhr, node, url) {
  *       // ...
  *     }
@@ -126,9 +130,9 @@ function getUrls(urls) {
  *     onError(xhr, node, url) {
  *       // ...
  *     },
- *     onComplete(cssText, cssArray) {
+ *     onComplete(cssText, cssArray, nodeArray) {
  *       // ...
- *     },
+ *     }
  *   });
  */ function getCssData(options) {
     var regex = {
@@ -140,12 +144,13 @@ function getUrls(urls) {
         exclude: options.exclude || null,
         filter: options.filter || null,
         parseRuntime: options.parseRuntime || false,
+        rootElement: options.rootElement || document,
         onBeforeSend: options.onBeforeSend || Function.prototype,
         onSuccess: options.onSuccess || Function.prototype,
         onError: options.onError || Function.prototype,
         onComplete: options.onComplete || Function.prototype
     };
-    var sourceNodes = Array.apply(null, document.querySelectorAll(settings.include)).filter(function(node) {
+    var sourceNodes = Array.apply(null, settings.rootElement.querySelectorAll(settings.include)).filter(function(node) {
         return !matchesSelector(node, settings.exclude);
     });
     var cssArray = Array.apply(null, Array(sourceNodes.length)).map(function(x) {

@@ -23,7 +23,9 @@ A micro-library for collecting stylesheet data from link and style nodes.
 ## Features
 
 - Collects CSS data from `<link>` and `<style>` nodes
-- Returns CSS data in DOM order as an array and a concatenated string
+- Collects static [Node.textContent](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) or live [CSS Object Model (CSSOM)](https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model) data
+- Returns CSS data as a concatenated string and a DOM-ordered array of strings
+- Allows document, iframe, and [shadow DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM) traversal
 - Handles `@import` rules
 - Handles absolute and relative URLs
 - Inspect, modify and/or filter CSS data from each node
@@ -125,6 +127,7 @@ getCss({
 - [exclude](#optionsexclude)
 - [filter](#optionsfilter)
 - [parseRuntime](#optionsparseruntime)
+- [rootElement](#optionsrootelement)
 - [onBeforeSend](#optionsonbeforesend)
 - [onSuccess](#optionsonsuccess)
 - [onError](#optionsonerror)
@@ -139,6 +142,7 @@ getCssData({
   exclude     : '',
   filter      : '',
   parseRuntime: false,
+  rootElement : document,
   onBeforeSend(xhr, node, url) {
     // ...
   },
@@ -211,15 +215,41 @@ getCssData({
 
 Determines how CSS data will be collected from `<style>` nodes.
 
-When `false`, CSS data is collected from each `<style>` node by reading its `textContent` value. When `true`, CSS data is collected from runtime values by iterating over the [`CSSRuleList`](https://developer.mozilla.org/en-US/docs/Web/API/CSSRuleList) object and concatenating all [`CSSRule.cssText`](https://developer.mozilla.org/en-US/docs/Web/API/CSSRule/cssText) values into a single string.
+When `false`, static CSS data is collected by reading each node's [textContent](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) value. This method is fast, but the data collected will not reflect changes made using the [`deleteRule()`](https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/deleteRule) or [`insertRule()`](https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/insertRule) methods. When `true`, live CSS data is collected by iterating over each node's [`CSSRuleList`](https://developer.mozilla.org/en-US/docs/Web/API/CSSRuleList) and concatenating all [`CSSRule.cssText`](https://developer.mozilla.org/en-US/docs/Web/API/CSSRule/cssText) values into a single string. This method is slower, but the data collected accurately reflects all changes made to the stylesheet. 
 
-Collecting data from runtime values is substantially slower, but it is necessary to obtain accurate CSS data when a stylesheet has been modified using the [`deleteRule()`](https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/deleteRule) or [`insertRule()`](https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/insertRule) methods because these modifications aren't reflected in the `textContent` value.
+Keep in mind that browsers often drop unrecognized selectors, properties, and values when parsing static CSS. For example, Chrome/Safari will drop declarations with Mozilla's `-moz-` prefix, while Firefox will drop declarations with Chrome/Safari's `-webkit` prefix . This means that data collected when this options is set to `true` will likely vary between browsers and differ from the static CSS collected when it is set to `false`.
 
 **Example**
 
 ```javascript
 getCssData({
   parseRuntime: false // default
+});
+```
+
+### options.rootElement
+
+- Type: `object`
+- Default: `document`
+
+Root element to traverse for `<link>` and `<style>` nodes.
+
+**Example**
+
+```javascript
+// Document
+getCssData({
+  rootElement: document // default
+});
+
+// Iframe (must be same domain with content loaded)
+getCssData({
+  rootElement: (myIframe.contentDocument || myIframe.contentWindow.document)
+});
+
+// Shadow DOM
+getCssData({
+  rootElement: myElement.shadowRoot
 });
 ```
 

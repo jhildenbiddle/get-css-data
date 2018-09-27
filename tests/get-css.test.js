@@ -18,6 +18,40 @@ function createElmsWrap(elmData, sharedOptions = {}) {
 }
 
 
+// Component
+// =============================================================================
+class TestComponent extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+    }
+
+    connectedCallback() {
+        this.shadowRoot.innerHTML = `
+            <style>
+                .test-component {
+                    background: red;
+                    background: var(--test-component-background, red);
+                    color: white;
+                }
+            </style>
+
+            <p class="test-component">${this.getAttribute('data-text')}</p>
+        `;
+    }
+}
+
+if (window.customElements) {
+    window.customElements.define('test-component', TestComponent);
+
+    // createElms({ tag: 'style', text: ':root { --test-component-background: green; }', appendTo: 'head' });
+    // createElms([
+    //     { tag: 'test-component', attr: { 'data-text': 'Custom element' }},
+    //     { tag: 'p', text: 'Standard element' }
+    // ], { appendTo: 'body' });
+}
+
+
 // Suite
 // =============================================================================
 describe('get-css', function() {
@@ -171,24 +205,27 @@ describe('get-css', function() {
             });
         });
 
-        it('returns CSS from single <link> node via CORS', function(done) {
-            // Must be CORS-enabled link using same protocol (http://) for IE9
-            const linkUrl = 'http://cdn.jsdelivr.net/npm/get-css-data@1.0.0/tests/fixtures/style1.css';
+        // Skip for IE9 which requires CORS request to use same protocol (http)
+        // but test CDN automatically redirects to https.
+        if (typeof XDomainRequest !== 'undefined') {
+            it('returns CSS from single <link> node via CORS', function(done) {
+                const linkUrl = 'https://unpkg.com/get-css-data@1.0.0/tests/fixtures/style1.css';
 
-            axios.get(linkUrl)
-                .then(response => response.data)
-                .then(expected => {
-                    createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`);
+                axios.get(linkUrl)
+                    .then(response => response.data)
+                    .then(expected => {
+                        createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`);
 
-                    getCss({
-                        include: '[data-test]',
-                        onComplete(cssText, cssArray, nodeArray) {
-                            expect(cssText).to.equal(expected);
-                            done();
-                        }
+                        getCss({
+                            include: '[data-test]',
+                            onComplete(cssText, cssArray, nodeArray) {
+                                expect(cssText).to.equal(expected);
+                                done();
+                            }
+                        });
                     });
-                });
-        });
+            });
+        }
 
         it('returns CSS from multiple <link> nodes', function(done) {
             const linkUrl  = '/base/tests/fixtures/style1.css';
@@ -248,6 +285,7 @@ describe('get-css', function() {
         const expected  = styleCss.repeat(elms.length);
 
         getCss({
+            include: '[data-test]',
             onComplete(cssText, cssArray, nodeArray) {
                 expect(cssText).to.equal(expected);
                 done();
@@ -316,6 +354,22 @@ describe('get-css', function() {
                 }
             });
         });
+
+        if (window.customElements) {
+            it('options.rootElement', function(done) {
+                const customElm      = createElmsWrap({ tag: 'test-component', attrs: { 'data-text': 'foobar' } })[0];
+                const shadowRoot     = customElm.shadowRoot;
+                const shadowStyleCss = shadowRoot.querySelector('style').textContent;
+
+                getCss({
+                    rootElement: shadowRoot,
+                    onComplete(cssText, cssArray, nodeArray) {
+                        expect(cssText).to.equal(shadowStyleCss);
+                        done();
+                    }
+                });
+            });
+        }
     });
 
 
