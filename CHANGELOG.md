@@ -2,17 +2,23 @@
 
 ## 1.4.0
 
-*Unreleased*
+*2018-09-27*
 
-- Added `options.parseRuntime` for collected CSS data from runtime values
+- Added `options.rootElement` for specifying the root element to traverse for
+  `<link>` and `<style>` nodes
+
+- Added `options.useCSSOM` for specifying how CSS data will be collected from
+  `<style>` nodes
 
 ## 1.3.2
 
 *2018-05-17*
 
-- Fixed `options.onSuccess` bug that resulted in a return value not being processed instead of the original `cssText`
+- Fixed `options.onSuccess` bug that resulted in a return value not being
+  processed instead of the original `cssText`
 
-- Fixed `options.onSuccess` behavior so that it is triggered for each `@import` (was only being triggered for `<link>` nodes)
+- Fixed `options.onSuccess` behavior so that it is triggered for each `@import`
+  (was only being triggered for `<link>` nodes)
 
 ## 1.3.1
 
