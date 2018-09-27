@@ -90,14 +90,14 @@ function getUrls(urls) {
  * @param {object}   [options.filter] Regular expression used to filter node CSS
  *                   data. Each block of CSS data is tested against the filter,
  *                   and only matching data is included.
- * @param {object}   [options.parseRuntime=false] Determines if CSS data will be
+ * @param {object}   [options.rootElement=document] Root element to traverse for
+ *                   <link> and <style> nodes.
+ * @param {object}   [options.useCSSOM=false] Determines if CSS data will be
  *                   collected from a stylesheet's runtime values instead of its
  *                   text content. This is required to get accurate CSS data
  *                   when a stylesheet has been modified using the deleteRule()
  *                   or insertRule() methods because these modifications will
  *                   not be reflected in the stylesheet's text content.
- * @param {object}   [options.rootElement=document] Root element to traverse for
- *                   <link> and <style> nodes.
  * @param {function} [options.onBeforeSend] Callback before XHR is sent. Passes
  *                   1) the XHR object, 2) source node reference, and 3) the
  *                   source URL as arguments.
@@ -116,10 +116,10 @@ function getUrls(urls) {
  * @example
  *
  *   getCssData({
- *     include: 'style,link[rel="stylesheet"]', // default
- *     exclude: '[href="skip.css"]',
- *     filter : /red/,
- *     parseRuntime: false, // default
+ *     include    : 'style,link[rel="stylesheet"]', // default
+ *     exclude    : '[href="skip.css"]',
+ *     filter     : /red/,
+ *     useCSSOM   : false, // default
  *     rootElement: document, //default
  *     onBeforeSend(xhr, node, url) {
  *       // ...
@@ -143,8 +143,8 @@ function getUrls(urls) {
         include: options.include || 'style,link[rel="stylesheet"]',
         exclude: options.exclude || null,
         filter: options.filter || null,
-        parseRuntime: options.parseRuntime || false,
         rootElement: options.rootElement || document,
+        useCSSOM: options.useCSSOM || false,
         onBeforeSend: options.onBeforeSend || Function.prototype,
         onSuccess: options.onSuccess || Function.prototype,
         onError: options.onError || Function.prototype,
@@ -260,7 +260,7 @@ function getUrls(urls) {
                 });
             } else if (isStyle) {
                 var cssText = node.textContent;
-                if (settings.parseRuntime) {
+                if (settings.useCSSOM) {
                     cssText = Array.apply(null, node.sheet.cssRules).map(function(rule) {
                         return rule.cssText;
                     }).join("");

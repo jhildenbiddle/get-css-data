@@ -331,13 +331,13 @@ describe('get-css', function() {
             });
         });
 
-        it('options.parseRuntime', function(done) {
+        it('options.useCSSOM', function(done) {
             const styleCss = fixtures['style1.css'];
             const styleElm = createElmsWrap({ tag: 'style' })[0];
 
             getCss({
                 include: '[data-test]',
-                parseRuntime: false,
+                useCSSOM: false,
                 onComplete(cssText, cssArray, nodeArray) {
                     expect(cssText, 'Before insertRule()').to.equal('');
                 }
@@ -347,7 +347,7 @@ describe('get-css', function() {
 
             getCss({
                 include: '[data-test]',
-                parseRuntime: true,
+                useCSSOM: true,
                 onComplete(cssText, cssArray, nodeArray) {
                     expect(cssText, 'After insertRule()').to.equal(styleCss);
                     done();

@@ -126,8 +126,8 @@ getCss({
 - [include](#optionsinclude)
 - [exclude](#optionsexclude)
 - [filter](#optionsfilter)
-- [parseRuntime](#optionsparseruntime)
 - [rootElement](#optionsrootelement)
+- [useCSSOM](#optionsusecssom)
 - [onBeforeSend](#optionsonbeforesend)
 - [onSuccess](#optionsonsuccess)
 - [onError](#optionsonerror)
@@ -141,8 +141,8 @@ getCssData({
   include     : 'link[rel=stylesheet],style',
   exclude     : '',
   filter      : '',
-  parseRuntime: false,
   rootElement : document,
+  useCSSOM    : false,
   onBeforeSend(xhr, node, url) {
     // ...
   },
@@ -208,25 +208,6 @@ getCssData({
 });
 ```
 
-### options.parseRuntime
-
-- Type: `boolean`
-- Default: `false`
-
-Determines how CSS data will be collected from `<style>` nodes.
-
-When `false`, static CSS data is collected by reading each node's [textContent](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) value. This method is fast, but the data collected will not reflect changes made using the [`deleteRule()`](https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/deleteRule) or [`insertRule()`](https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/insertRule) methods. When `true`, live CSS data is collected by iterating over each node's [`CSSRuleList`](https://developer.mozilla.org/en-US/docs/Web/API/CSSRuleList) and concatenating all [`CSSRule.cssText`](https://developer.mozilla.org/en-US/docs/Web/API/CSSRule/cssText) values into a single string. This method is slower, but the data collected accurately reflects all changes made to the stylesheet. 
-
-Keep in mind that browsers often drop unrecognized selectors, properties, and values when parsing static CSS. For example, Chrome/Safari will drop declarations with Mozilla's `-moz-` prefix, while Firefox will drop declarations with Chrome/Safari's `-webkit` prefix . This means that data collected when this options is set to `true` will likely vary between browsers and differ from the static CSS collected when it is set to `false`.
-
-**Example**
-
-```javascript
-getCssData({
-  parseRuntime: false // default
-});
-```
-
 ### options.rootElement
 
 - Type: `object`
@@ -250,6 +231,25 @@ getCssData({
 // Shadow DOM
 getCssData({
   rootElement: myElement.shadowRoot
+});
+```
+
+### options.useCSSOM
+
+- Type: `boolean`
+- Default: `false`
+
+Determines how CSS data will be collected from `<style>` nodes.
+
+When `false`, static CSS data is collected by reading each node's [textContent](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent) value. This method is fast, but the data collected will not reflect changes made using the [`deleteRule()`](https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/deleteRule) or [`insertRule()`](https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/insertRule) methods. When `true`, live CSS data is collected by iterating over each node's [`CSSRuleList`](https://developer.mozilla.org/en-US/docs/Web/API/CSSRuleList) and concatenating all [`CSSRule.cssText`](https://developer.mozilla.org/en-US/docs/Web/API/CSSRule/cssText) values into a single string. This method is slower, but the data collected accurately reflects all changes made to the stylesheet.
+
+Keep in mind that browsers often drop unrecognized selectors, properties, and values when parsing static CSS. For example, Chrome/Safari will drop declarations with Mozilla's `-moz-` prefix, while Firefox will drop declarations with Chrome/Safari's `-webkit` prefix . This means that data collected when this options is set to `true` will likely vary between browsers and differ from the static CSS collected when it is set to `false`.
+
+**Example**
+
+```javascript
+getCssData({
+  useCSSOM: false // default
 });
 ```
 
