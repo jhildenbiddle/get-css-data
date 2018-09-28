@@ -123,10 +123,10 @@ getCss({
 
 ## Options
 
+- [rootElement](#optionsrootelement)
 - [include](#optionsinclude)
 - [exclude](#optionsexclude)
 - [filter](#optionsfilter)
-- [rootElement](#optionsrootelement)
 - [useCSSOM](#optionsusecssom)
 - [onBeforeSend](#optionsonbeforesend)
 - [onSuccess](#optionsonsuccess)
@@ -138,10 +138,10 @@ getCss({
 ```javascript
 // Default values shown
 getCssData({
+  rootElement : document,
   include     : 'link[rel=stylesheet],style',
   exclude     : '',
   filter      : '',
-  rootElement : document,
   useCSSOM    : false,
   onBeforeSend(xhr, node, url) {
     // ...
@@ -155,6 +155,32 @@ getCssData({
   onComplete(cssText, cssArray, nodeArray) {
     // ...
   }
+});
+```
+
+### options.rootElement
+
+- Type: `object`
+- Default: `document`
+
+Root element to traverse for `<link>` and `<style>` nodes.
+
+**Examples**
+
+```javascript
+// Document
+getCssData({
+  rootElement: document // default
+});
+
+// Iframe (must be same domain with content loaded)
+getCssData({
+  rootElement: (myIframe.contentDocument || myIframe.contentWindow.document)
+});
+
+// Shadow DOM
+getCssData({
+  rootElement: myElement.shadowRoot
 });
 ```
 
@@ -205,32 +231,6 @@ getCssData({
   // of ".myclass". If found, process the CSS.
   // If not, ignore the CSS.
   filter: /\.myclass/,
-});
-```
-
-### options.rootElement
-
-- Type: `object`
-- Default: `document`
-
-Root element to traverse for `<link>` and `<style>` nodes.
-
-**Example**
-
-```javascript
-// Document
-getCssData({
-  rootElement: document // default
-});
-
-// Iframe (must be same domain with content loaded)
-getCssData({
-  rootElement: (myIframe.contentDocument || myIframe.contentWindow.document)
-});
-
-// Shadow DOM
-getCssData({
-  rootElement: myElement.shadowRoot
 });
 ```
 

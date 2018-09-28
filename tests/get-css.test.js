@@ -9,9 +9,11 @@ import { expect } from 'chai';
 // Helpers
 // =============================================================================
 function createElmsWrap(elmData, sharedOptions = {}) {
+    const isHeadElm = elmData.tag && ['link', 'style'].indexOf(elmData.tag) !== -1;
+
     sharedOptions = Object.assign({}, {
         attr    : Object.assign({ 'data-test': true }, sharedOptions.attr || {}),
-        appendTo: 'head'
+        appendTo: isHeadElm ? 'head' : 'body'
     }, sharedOptions);
 
     return createElms(elmData, sharedOptions);
@@ -296,6 +298,22 @@ describe('get-css', function() {
     // Tests: Options
     // -------------------------------------------------------------------------
     describe('Options', function() {
+        if (window.customElements) {
+            it('options.rootElement', function(done) {
+                const customElm      = createElmsWrap({ tag: 'test-component', attr: { 'data-text': 'Custom Element' } })[0];
+                const shadowRoot     = customElm.shadowRoot;
+                const shadowStyleCss = shadowRoot.querySelector('style').textContent;
+
+                getCss({
+                    rootElement: shadowRoot,
+                    onComplete(cssText, cssArray, nodeArray) {
+                        expect(cssText).to.equal(shadowStyleCss);
+                        done();
+                    }
+                });
+            });
+        }
+
         it('options.exclude', function(done) {
             const linkUrl  = '/base/tests/fixtures/style1.css';
             const styleCss = fixtures['style1.css'];
@@ -353,22 +371,6 @@ describe('get-css', function() {
                 }
             });
         });
-
-        if (window.customElements) {
-            it('options.rootElement', function(done) {
-                const customElm      = createElmsWrap({ tag: 'test-component', attr: { 'data-text': 'Custom Element' } })[0];
-                const shadowRoot     = customElm.shadowRoot;
-                const shadowStyleCss = shadowRoot.querySelector('style').textContent;
-
-                getCss({
-                    rootElement: shadowRoot,
-                    onComplete(cssText, cssArray, nodeArray) {
-                        expect(cssText).to.equal(shadowStyleCss);
-                        done();
-                    }
-                });
-            });
-        }
     });
 
 

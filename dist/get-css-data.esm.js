@@ -83,6 +83,8 @@ function getUrls(urls) {
  *
  * @preserve
  * @param {object}   [options] The options object
+ * @param {object}   [options.rootElement=document] Root element to traverse for
+ *                   <link> and <style> nodes.
  * @param {string}   [options.include] CSS selector matching <link> and <style>
  *                   nodes to include
  * @param {string}   [options.exclude] CSS selector matching <link> and <style>
@@ -90,8 +92,6 @@ function getUrls(urls) {
  * @param {object}   [options.filter] Regular expression used to filter node CSS
  *                   data. Each block of CSS data is tested against the filter,
  *                   and only matching data is included.
- * @param {object}   [options.rootElement=document] Root element to traverse for
- *                   <link> and <style> nodes.
  * @param {object}   [options.useCSSOM=false] Determines if CSS data will be
  *                   collected from a stylesheet's runtime values instead of its
  *                   text content. This is required to get accurate CSS data
@@ -116,11 +116,11 @@ function getUrls(urls) {
  * @example
  *
  *   getCssData({
- *     include    : 'style,link[rel="stylesheet"]', // default
+ *     rootElement: document,
+ *     include    : 'style,link[rel="stylesheet"]',
  *     exclude    : '[href="skip.css"]',
  *     filter     : /red/,
- *     useCSSOM   : false, // default
- *     rootElement: document, //default
+ *     useCSSOM   : false,
  *     onBeforeSend(xhr, node, url) {
  *       // ...
  *     }
@@ -140,10 +140,10 @@ function getUrls(urls) {
         cssImports: /(?:@import\s*)(?:url\(\s*)?(?:['"])([^'"]*)(?:['"])(?:\s*\))?(?:[^;]*;)/g
     };
     var settings = {
+        rootElement: options.rootElement || document,
         include: options.include || 'style,link[rel="stylesheet"]',
         exclude: options.exclude || null,
         filter: options.filter || null,
-        rootElement: options.rootElement || document,
         useCSSOM: options.useCSSOM || false,
         onBeforeSend: options.onBeforeSend || Function.prototype,
         onSuccess: options.onSuccess || Function.prototype,
