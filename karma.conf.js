@@ -21,8 +21,9 @@ const localConfig = {
         'ChromeHeadless'
     ],
     files: [
+        'https://cdn.polyfill.io/v2/polyfill.min.js', // Required for web component tests
         'node_modules/babel-polyfill/dist/polyfill.js',
-        'node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js',
+        'node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js', // Required for web component tests
         files.test,
         // Serve files for accessing in tests via AJAX
         // Ex: /base/[files.serve]/path/to/file
@@ -117,23 +118,27 @@ const remoteConfig = Object.assign({}, localConfig, {
             platform   : 'Windows 10',
             version    : '11.0'
         },
-        sl_ie_10: {
-            base       : 'SauceLabs',
-            browserName: 'Internet Explorer',
-            platform   : 'Windows 8',
-            version    : '10.0'
-        },
-        sl_ie_9: {
-            base       : 'SauceLabs',
-            browserName: 'Internet Explorer',
-            platform   : 'Windows 7',
-            version    : '9.0'
-        },
+
+        // IE < 11 test disabled due to web component incompatibility
+        // ----------------------------------------------------------
+        // sl_ie_10: {
+        //     base       : 'SauceLabs',
+        //     browserName: 'Internet Explorer',
+        //     platform   : 'Windows 8',
+        //     version    : '10.0'
+        // },
+        // sl_ie_9: {
+        //     base       : 'SauceLabs',
+        //     browserName: 'Internet Explorer',
+        //     platform   : 'Windows 7',
+        //     version    : '9.0'
+        // },
+
         sl_safari: {
             base       : 'SauceLabs',
             browserName: 'Safari',
-            platform   : 'OS X 10.9',
-            version    : '7.0'
+            platform   : 'OS X 10.10',
+            version    : '8.0'
         }
     },
     // Set browsers to customLaunchers

@@ -30,8 +30,7 @@ class TestComponent extends HTMLElement {
         this.shadowRoot.innerHTML = `
             <style>
                 .test-component {
-                    background: red;
-                    background: var(--test-component-background, red);
+                    background: green;
                     color: white;
                 }
             </style>
@@ -357,7 +356,7 @@ describe('get-css', function() {
 
         if (window.customElements) {
             it('options.rootElement', function(done) {
-                const customElm      = createElmsWrap({ tag: 'test-component', attrs: { 'data-text': 'foobar' } })[0];
+                const customElm      = createElmsWrap({ tag: 'test-component', attr: { 'data-text': 'Custom Element' } })[0];
                 const shadowRoot     = customElm.shadowRoot;
                 const shadowStyleCss = shadowRoot.querySelector('style').textContent;
 
