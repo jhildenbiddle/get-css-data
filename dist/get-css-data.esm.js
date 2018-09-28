@@ -32,7 +32,7 @@ function getUrls(urls) {
     urlArray.forEach(function(url, i) {
         var parser = document.createElement("a");
         parser.setAttribute("href", url);
-        parser.href = parser.href;
+        parser.href = String(parser.href);
         var isCrossDomain = parser.host !== location.host;
         var isSameProtocol = parser.protocol === location.protocol;
         if (isCrossDomain && typeof XDomainRequest !== "undefined") {
@@ -83,6 +83,8 @@ function getUrls(urls) {
  *
  * @preserve
  * @param {object}   [options] The options object
+ * @param {object}   [options.rootElement=document] Root element to traverse for
+ *                   <link> and <style> nodes.
  * @param {string}   [options.include] CSS selector matching <link> and <style>
  *                   nodes to include
  * @param {string}   [options.exclude] CSS selector matching <link> and <style>
@@ -90,6 +92,12 @@ function getUrls(urls) {
  * @param {object}   [options.filter] Regular expression used to filter node CSS
  *                   data. Each block of CSS data is tested against the filter,
  *                   and only matching data is included.
+ * @param {object}   [options.useCSSOM=false] Determines if CSS data will be
+ *                   collected from a stylesheet's runtime values instead of its
+ *                   text content. This is required to get accurate CSS data
+ *                   when a stylesheet has been modified using the deleteRule()
+ *                   or insertRule() methods because these modifications will
+ *                   not be reflected in the stylesheet's text content.
  * @param {function} [options.onBeforeSend] Callback before XHR is sent. Passes
  *                   1) the XHR object, 2) source node reference, and 3) the
  *                   source URL as arguments.
@@ -108,9 +116,11 @@ function getUrls(urls) {
  * @example
  *
  *   getCssData({
- *     include: 'style,link[rel="stylesheet"]', // default
- *     exclude: '[href="skip.css"]',
- *     filter : /red/,
+ *     rootElement: document,
+ *     include    : 'style,link[rel="stylesheet"]',
+ *     exclude    : '[href="skip.css"]',
+ *     filter     : /red/,
+ *     useCSSOM   : false,
  *     onBeforeSend(xhr, node, url) {
  *       // ...
  *     }
@@ -120,9 +130,9 @@ function getUrls(urls) {
  *     onError(xhr, node, url) {
  *       // ...
  *     },
- *     onComplete(cssText, cssArray) {
+ *     onComplete(cssText, cssArray, nodeArray) {
  *       // ...
- *     },
+ *     }
  *   });
  */ function getCssData(options) {
     var regex = {
@@ -130,15 +140,17 @@ function getUrls(urls) {
         cssImports: /(?:@import\s*)(?:url\(\s*)?(?:['"])([^'"]*)(?:['"])(?:\s*\))?(?:[^;]*;)/g
     };
     var settings = {
+        rootElement: options.rootElement || document,
         include: options.include || 'style,link[rel="stylesheet"]',
         exclude: options.exclude || null,
         filter: options.filter || null,
+        useCSSOM: options.useCSSOM || false,
         onBeforeSend: options.onBeforeSend || Function.prototype,
         onSuccess: options.onSuccess || Function.prototype,
         onError: options.onError || Function.prototype,
         onComplete: options.onComplete || Function.prototype
     };
-    var sourceNodes = Array.apply(null, document.querySelectorAll(settings.include)).filter(function(node) {
+    var sourceNodes = Array.apply(null, settings.rootElement.querySelectorAll(settings.include)).filter(function(node) {
         return !matchesSelector(node, settings.exclude);
     });
     var cssArray = Array.apply(null, Array(sourceNodes.length)).map(function(x) {
@@ -247,7 +259,13 @@ function getUrls(urls) {
                     }
                 });
             } else if (isStyle) {
-                handleSuccess(node.textContent, i, node, location.href);
+                var cssText = node.textContent;
+                if (settings.useCSSOM) {
+                    cssText = Array.apply(null, node.sheet.cssRules).map(function(rule) {
+                        return rule.cssText;
+                    }).join("");
+                }
+                handleSuccess(cssText, i, node, location.href);
             } else {
                 cssArray[i] = "";
                 handleComplete();

@@ -12,6 +12,8 @@ import getUrls from './get-urls';
  *
  * @preserve
  * @param {object}   [options] The options object
+ * @param {object}   [options.rootElement=document] Root element to traverse for
+ *                   <link> and <style> nodes.
  * @param {string}   [options.include] CSS selector matching <link> and <style>
  *                   nodes to include
  * @param {string}   [options.exclude] CSS selector matching <link> and <style>
@@ -19,6 +21,12 @@ import getUrls from './get-urls';
  * @param {object}   [options.filter] Regular expression used to filter node CSS
  *                   data. Each block of CSS data is tested against the filter,
  *                   and only matching data is included.
+ * @param {object}   [options.useCSSOM=false] Determines if CSS data will be
+ *                   collected from a stylesheet's runtime values instead of its
+ *                   text content. This is required to get accurate CSS data
+ *                   when a stylesheet has been modified using the deleteRule()
+ *                   or insertRule() methods because these modifications will
+ *                   not be reflected in the stylesheet's text content.
  * @param {function} [options.onBeforeSend] Callback before XHR is sent. Passes
  *                   1) the XHR object, 2) source node reference, and 3) the
  *                   source URL as arguments.
@@ -37,9 +45,11 @@ import getUrls from './get-urls';
  * @example
  *
  *   getCssData({
- *     include: 'style,link[rel="stylesheet"]', // default
- *     exclude: '[href="skip.css"]',
- *     filter : /red/,
+ *     rootElement: document,
+ *     include    : 'style,link[rel="stylesheet"]',
+ *     exclude    : '[href="skip.css"]',
+ *     filter     : /red/,
+ *     useCSSOM   : false,
  *     onBeforeSend(xhr, node, url) {
  *       // ...
  *     }
@@ -49,9 +59,9 @@ import getUrls from './get-urls';
  *     onError(xhr, node, url) {
  *       // ...
  *     },
- *     onComplete(cssText, cssArray) {
+ *     onComplete(cssText, cssArray, nodeArray) {
  *       // ...
- *     },
+ *     }
  *   });
  */
 function getCssData(options) {
@@ -62,15 +72,17 @@ function getCssData(options) {
         cssImports : /(?:@import\s*)(?:url\(\s*)?(?:['"])([^'"]*)(?:['"])(?:\s*\))?(?:[^;]*;)/g
     };
     const settings = {
+        rootElement : options.rootElement  || document,
         include     : options.include      || 'style,link[rel="stylesheet"]',
         exclude     : options.exclude      || null,
         filter      : options.filter       || null,
+        useCSSOM    : options.useCSSOM     || false,
         onBeforeSend: options.onBeforeSend || Function.prototype,
         onSuccess   : options.onSuccess    || Function.prototype,
         onError     : options.onError      || Function.prototype,
         onComplete  : options.onComplete   || Function.prototype
     };
-    const sourceNodes = Array.apply(null, document.querySelectorAll(settings.include)).filter(node => !matchesSelector(node, settings.exclude));
+    const sourceNodes = Array.apply(null, settings.rootElement.querySelectorAll(settings.include)).filter(node => !matchesSelector(node, settings.exclude));
     const cssArray    = Array.apply(null, Array(sourceNodes.length)).map(x => null);
 
     /**
@@ -253,7 +265,15 @@ function getCssData(options) {
                 });
             }
             else if (isStyle) {
-                handleSuccess(node.textContent, i, node, location.href);
+                let cssText = node.textContent;
+
+                if (settings.useCSSOM) {
+                    cssText = Array.apply(null, node.sheet.cssRules)
+                        .map(rule => rule.cssText)
+                        .join('');
+                }
+
+                handleSuccess(cssText, i, node, location.href);
             }
             else {
                 cssArray[i] = '';

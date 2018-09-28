@@ -1,24 +1,36 @@
 # Change Log
 
+## 1.4.0
+
+*2018-09-28*
+
+- Added `options.rootElement` for specifying the root element to traverse for
+  `<link>` and `<style>` nodes.
+
+- Added `options.useCSSOM` to determine if CSS data should be collected from
+  CSSRule.cssText or Node.textContent values.
+
 ## 1.3.2
 
 *2018-05-17*
 
-- Fixed `options.onSuccess` bug that resulted in a return value not being processed instead of the original `cssText`
+- Fixed `options.onSuccess` bug that resulted in a return value not being
+  processed instead of the original `cssText`.
 
-- Fixed `options.onSuccess` behavior so that it is triggered for each `@import` (was only being triggered for `<link>` nodes)
+- Fixed `options.onSuccess` behavior so that it is triggered for each `@import`
+  (was only being triggered for `<link>` nodes).
 
 ## 1.3.1
 
 *2018-05-16*
 
-- Added `options.onBeforeSend` callback
+- Added `options.onBeforeSend` callback.
 
 - Fixed `@import` bug that caused duplicate requests to be sent when fetching
-  multiple imports in the same file
+  multiple imports in the same file.
 
 - Fixed `@import` bug that caused requests to fail when fetching multiple
-  imports from different directories in the same file
+  imports from different directories in the same file.
 
 ## 1.2.0
 

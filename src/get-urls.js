@@ -1,3 +1,5 @@
+/*global XDomainRequest*/
+
 // Functions
 // =============================================================================
 /**
@@ -55,7 +57,7 @@ function getUrls(urls, options = {}) {
         const parser = document.createElement('a');
 
         parser.setAttribute('href', url);
-        parser.href = parser.href;
+        parser.href = String(parser.href);
 
         const isCrossDomain  = parser.host !== location.host;
         const isSameProtocol = parser.protocol === location.protocol;
