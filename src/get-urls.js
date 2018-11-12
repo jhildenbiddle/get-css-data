@@ -35,6 +35,12 @@ function getUrls(urls, options = {}) {
 
     // Functions (Private)
     // -------------------------------------------------------------------------
+    function isValidCss(cssText = '') {
+        const isHTML = cssText.trim().charAt(0) === '<';
+
+        return !isHTML;
+    }
+
     function onError(xhr, urlIndex) {
         settings.onError(xhr, urlArray[urlIndex], urlIndex);
     }
@@ -74,7 +80,12 @@ function getUrls(urls, options = {}) {
                 xdr.onprogress = Function.prototype; // Prevent aborts/timeouts
                 xdr.ontimeout = Function.prototype; // Prevent aborts/timeouts
                 xdr.onload = function() {
-                    onSuccess(xdr.responseText, i);
+                    if (isValidCss(xdr.responseText)) {
+                        onSuccess(xdr.responseText, i);
+                    }
+                    else {
+                        onError(xdr, i);
+                    }
                 };
                 xdr.onerror = function(err) {
                     onError(xdr, i);
@@ -108,7 +119,7 @@ function getUrls(urls, options = {}) {
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                     // Success
-                    if (xhr.status === 200) {
+                    if (xhr.status === 200 && isValidCss(xhr.responseText)) {
                         onSuccess(xhr.responseText, i);
                     }
                     // Error

@@ -311,7 +311,8 @@ getCss({
   1. **node**: The source node `object` reference
   1. **url**: The source URL `string` (`<link>` href or `@import` url)
 
-Callback after `<link>` or `@import` request has failed.
+Callback after `<link>` or `@import` request has failed or when
+`xhr.responseText` appears to be HTML instead of CSS.
 
 **Example**
 

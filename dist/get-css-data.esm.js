@@ -18,6 +18,11 @@ function getUrls(urls) {
     var urlQueue = Array.apply(null, Array(urlArray.length)).map(function(x) {
         return null;
     });
+    function isValidCss() {
+        var cssText = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+        var isHTML = cssText.trim().charAt(0) === "<";
+        return !isHTML;
+    }
     function onError(xhr, urlIndex) {
         settings.onError(xhr, urlArray[urlIndex], urlIndex);
     }
@@ -43,7 +48,11 @@ function getUrls(urls) {
                 xdr.onprogress = Function.prototype;
                 xdr.ontimeout = Function.prototype;
                 xdr.onload = function() {
-                    onSuccess(xdr.responseText, i);
+                    if (isValidCss(xdr.responseText)) {
+                        onSuccess(xdr.responseText, i);
+                    } else {
+                        onError(xdr, i);
+                    }
                 };
                 xdr.onerror = function(err) {
                     onError(xdr, i);
@@ -64,7 +73,7 @@ function getUrls(urls) {
             settings.onBeforeSend(xhr, url, i);
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
+                    if (xhr.status === 200 && isValidCss(xhr.responseText)) {
                         onSuccess(xhr.responseText, i);
                     } else {
                         onError(xhr, i);

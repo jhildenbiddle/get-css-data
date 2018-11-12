@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.5.0
+
+*2018-11-11*
+
+- Added check to prevent HTML returned from stylesheet 404 redirects from being
+  processed as CSS.
+
 ## 1.4.0
 
 *2018-09-28*

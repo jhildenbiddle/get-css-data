@@ -498,7 +498,7 @@ describe('get-css', function() {
             });
         });
 
-        it('triggers onError callback for each <style> node', function(done) {
+        it('triggers onError callback for each @import 404 error', function(done) {
             const styleCss = '@import "fail.css";';
             const styleElms = createElmsWrap(`<style>${styleCss}</style>`.repeat(3));
 
@@ -516,8 +516,26 @@ describe('get-css', function() {
             });
         });
 
-        it('triggers onError callback for each <link> node', function(done) {
+        it('triggers onError callback for each <link> 404 error', function(done) {
             const linkUrl  = 'fail.css';
+            const linkElms = createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));
+
+            let onErrorCount = 0;
+
+            getCss({
+                include: '[data-test]',
+                onError(xhr, node, url) {
+                    onErrorCount++;
+                },
+                onComplete(cssText, cssArray, nodeArray) {
+                    expect(onErrorCount).to.equal(linkElms.length);
+                    done();
+                }
+            });
+        });
+
+        it('triggers onError callback for each invalid <link> XMLHttpRequest.responseText', function(done) {
+            const linkUrl  = '/base/tests/fixtures/404.html';
             const linkElms = createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));
 
             let onErrorCount = 0;
