@@ -116,7 +116,7 @@ function getCssData(options) {
     function handleSuccess(cssText, cssIndex, node, sourceUrl) {
         const returnVal = settings.onSuccess(cssText, node, sourceUrl);
 
-        cssText = returnVal === false ? '' : returnVal || cssText;
+        cssText = returnVal !== undefined && Boolean(returnVal) === false ? '' : returnVal || cssText;
 
         resolveImports(cssText, node, sourceUrl, function(resolvedCssText, errorData) {
             if (cssArray[cssIndex] === null) {

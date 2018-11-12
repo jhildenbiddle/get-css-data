@@ -286,7 +286,7 @@ getCss({
   1. **node**: The source node `object` reference
   1. **url**: The source URL `string` (`<link>` href, `@import` url, or page url for `<style>` data)
 
-Callback after CSS data has been collected from each node. Allows modifying the CSS data before it is added to the final output by returning any `string` value (or `false` to skip).
+Callback after CSS data has been collected from each node. Allows modifying the CSS data before it is added to the final output by returning any `string` value or skipping the CSS data by returning `false`, `null`, or an empty string (`""`).
 
 Note that the order in which `<link>` and `@import` CSS data is "successfully" collected (thereby triggering this callback) is not guaranteed as these requests are asynchronous. To access CSS data in DOM order, use the `cssArray` argument passed to the [options.oncomplete](#optionsoncomplete) callback.
 

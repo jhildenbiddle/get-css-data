@@ -460,16 +460,22 @@ describe('get-css', function() {
         });
 
         it('filters CSS text based on onSuccess() value', function(done) {
-            const linkUrl  = '/base/tests/fixtures/style1.css';
-            const styleCss = fixtures['style1.css'];
-
-            createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`);
-            createElmsWrap(`<style>${styleCss}</style>`);
+            const testElms = createElmsWrap([
+                '<style>.one { color: red; }</style>',
+                '<style>.two { color: green; }</style>',
+                '<style>.three { color: blue; }</style>',
+                '<style>.four { color: black; }</style>'
+            ]);
 
             getCss({
                 include: '[data-test]',
                 onSuccess(cssText, node, url) {
-                    return false;
+                    const returnVals = [false, null, 0, ''];
+                    const nodeIndex  = testElms.indexOf(node);
+
+                    if (nodeIndex > -1) {
+                        return returnVals[nodeIndex];
+                    }
                 },
                 onComplete(cssText, cssArray, nodeArray) {
                     expect(cssText).to.equal('');

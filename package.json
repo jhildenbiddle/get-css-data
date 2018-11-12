@@ -52,7 +52,7 @@
     "prepare": "rimraf dist/* && npm run build",
     "build": "rollup -c",
     "dev": "npm start | npm run test-watch",
-    "start": "rimraf coverage/* dist/* && npm run build -- --watch",
+    "start": "rimraf coverage/* && npm run build -- --watch",
     "test": "rimraf coverage/* && karma start",
     "test-watch": "npm test -- --auto-watch --no-single-run",
     "test-remote": "npm test -- --remote",
