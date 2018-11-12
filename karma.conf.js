@@ -21,9 +21,8 @@ const localConfig = {
         'ChromeHeadless'
     ],
     files: [
-        'https://cdn.polyfill.io/v2/polyfill.min.js', // Required for web component tests
-        'node_modules/babel-polyfill/dist/polyfill.js',
-        'node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js', // Required for web component tests
+        'node_modules/@babel/polyfill/dist/polyfill.js',
+        'node_modules/@webcomponents/webcomponentsjs/webcomponents-bundle.js',
         files.test,
         // Serve files for accessing in tests via AJAX
         // Ex: /base/[files.serve]/path/to/file
@@ -45,7 +44,7 @@ const localConfig = {
                     loader : 'babel-loader',
                     options: {
                         presets: [
-                            ['env', {
+                            ['@babel/env', {
                                 targets: {
                                     browsers: ['ie >= 9']
                                 }
@@ -54,7 +53,9 @@ const localConfig = {
                         plugins: [
                             'transform-custom-element-classes',
                             ['istanbul', {
-                                exclude: ['**/*.test.js']
+                                exclude: [
+                                    '**/*.test.js'
+                                ]
                             }]
                         ]
                     },
