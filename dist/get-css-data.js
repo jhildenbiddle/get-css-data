@@ -43,8 +43,9 @@
             parser.setAttribute("href", url);
             parser.href = String(parser.href);
             var isCrossDomain = parser.host !== location.host;
+            var isIElte9 = document.all && !window.atob;
             var isSameProtocol = parser.protocol === location.protocol;
-            if (isCrossDomain && typeof XDomainRequest !== "undefined") {
+            if (isCrossDomain && isIElte9) {
                 if (isSameProtocol) {
                     var xdr = new XDomainRequest();
                     xdr.open("GET", url);
