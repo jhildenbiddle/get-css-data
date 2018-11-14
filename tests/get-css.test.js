@@ -6,6 +6,11 @@ import getCss     from '../src/get-css';
 import { expect } from 'chai';
 
 
+// Constants & Variables
+// =============================================================================
+const isIElte9 = document.all && !window.atob;
+
+
 // Helpers
 // =============================================================================
 function createElmsWrap(elmData, sharedOptions = {}) {
@@ -20,47 +25,32 @@ function createElmsWrap(elmData, sharedOptions = {}) {
 }
 
 
-// Component
-// =============================================================================
-class TestComponent extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-    }
-
-    connectedCallback() {
-        this.shadowRoot.innerHTML = `
-            <style>
-                .test-component {
-                    background: green;
-                    color: white;
-                }
-            </style>
-
-            <p class="test-component">${this.getAttribute('data-text')}</p>
-        `;
-    }
-}
-
-if (window.customElements) {
-    window.customElements.define('test-component', TestComponent);
-
-    // createElms({ tag: 'style', text: ':root { --test-component-background: green; }', appendTo: 'head' });
-    // createElms([
-    //     { tag: 'test-component', attr: { 'data-text': 'Custom element' }},
-    //     { tag: 'p', text: 'Standard element' }
-    // ], { appendTo: 'body' });
-}
-
-
 // Suite
 // =============================================================================
 describe('get-css', function() {
     const fixtures = {};
 
-
     // Hooks
     // -------------------------------------------------------------------------
+    // Conditionally include web component+polyfill to avoid errors in IE < 11
+    before(function() {
+        const hasWebComponentSupport = () => 'customElements' in window;
+        const isNotIELessThan11      = navigator.appVersion.indexOf('MSIE') === -1;
+
+        if (!hasWebComponentSupport() && isNotIELessThan11) {
+            console.log('*** Injected: Web Component Polyfill ***');
+
+            require('@webcomponents/webcomponentsjs/webcomponents-bundle.js');
+        }
+
+        if (hasWebComponentSupport()) {
+            console.log('*** Injected: Web Component ***');
+
+            require('./helpers/inject-test-component.js')();
+        }
+    });
+
+    // Load Fixtures
     before(async function() {
         const fixtureBaseUrl = '/base/tests/fixtures/';
         const fixtureUrls    = [
@@ -71,7 +61,6 @@ describe('get-css', function() {
             'style3.out.css'
         ];
 
-        // Load Fixtures
         await axios.all(fixtureUrls.map(url => axios.get(`${fixtureBaseUrl}${url}`)))
             .then(axios.spread(function (...responseArr) {
                 responseArr.forEach((response, i) => {
@@ -206,9 +195,8 @@ describe('get-css', function() {
             });
         });
 
-        // Skip for IE9 which requires CORS request to use same protocol (http)
-        // but test CDN automatically redirects to https.
-        if (typeof XDomainRequest !== 'undefined') {
+        // Skip for IE9 which requires CORS request to use same protocol
+        if (!isIElte9) {
             it('returns CSS from single <link> node via CORS', function(done) {
                 const linkUrl = 'https://unpkg.com/get-css-data@1.0.0/tests/fixtures/style1.css';
 
