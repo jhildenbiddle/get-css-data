@@ -7,59 +7,59 @@ const saucelabs = require('./saucelabs.config');
 // Variables
 // =============================================================================
 const files = {
-    test : './tests/**/*.test.js'
+    fixtures: './tests/fixtures/**/*',
+    test    : './tests/**/*.test.js'
 };
 
 
-// Local config
+// Settings
 // =============================================================================
-const localConfig = {
-    // Add browsers via Karma launchers
-    // https://www.npmjs.com/search?q=karma+launcher
-    browsers: [
-        'ChromeHeadless'
-    ],
+const settings = {
     files: [
-        // Included
         'node_modules/@babel/polyfill/dist/polyfill.js',
         files.test,
-        // Served only
-        // NOTE: Access in test files by prepending /base/ to path)
-        { pattern: './tests/fixtures/**/*.*', included: false, served: true, watched: true }
+        // Served only (Access in tests by prepending /base/ to path)
+        { pattern: files.fixtures, included: false, served: true, watched: true }
     ],
     preprocessors: {
-        [files.test]: ['eslint', 'webpack', 'sourcemap']
+        [files.fixtures]: ['file-fixtures'],
+        [files.test]    : ['eslint', 'webpack', 'sourcemap']
     },
     frameworks: ['mocha', 'chai'],
-    reporters : ['mocha', 'coverage'],
-    webpack   : {
-        mode   : 'development',
-        devtool: 'inline-source-map',
-        module : {
-            rules: [{
-                test   : /\.js$/,
-                exclude: [/node_modules/],
-                use    : [{
-                    loader : 'babel-loader',
-                    options: {
-                        presets: [
-                            ['@babel/env', {
-                                targets: {
-                                    browsers: ['ie >= 9']
-                                }
-                            }]
-                        ],
-                        plugins: [
-                            'transform-custom-element-classes',
-                            ['istanbul', {
-                                exclude: [
-                                    '**/*.test.js'
+    reporters : ['mocha', 'coverage-istanbul'],
+    fileFixtures: {
+        stripPrefix: 'tests/fixtures/'
+    },
+    webpack: {
+        mode  : 'development',
+        module: {
+            rules: [
+                {
+                    test   : /\.js$/,
+                    exclude: [/node_modules/],
+                    use    : [
+                        {
+                            loader : 'babel-loader',
+                            options: {
+                                presets: [
+                                    [
+                                        '@babel/env',
+                                        {
+                                            targets: {
+                                                browsers: ['ie >= 9']
+                                            }
+                                        }
+                                    ]
+                                ],
+                                plugins: [
+                                    'transform-custom-element-classes',
+                                    ['istanbul', { exclude: 'tests/*' }]
                                 ]
-                            }]
-                        ]
-                    },
-                }]
-            }]
+                            },
+                        }
+                    ]
+                }
+            ]
         }
     },
     webpackMiddleware: {
@@ -67,122 +67,112 @@ const localConfig = {
         stats: 'minimal'
     },
     // Code coverage
-    // https://www.npmjs.com/package/karma-coverage
-    coverageReporter: {
-        reporters: [
-            { type: 'html' },
-            { type: 'lcovonly' },
-            { type: 'text-summary' }
-        ]
+    // https://github.com/mattlewis92/karma-coverage-istanbul-reporter
+    coverageIstanbulReporter: {
+        reports                : ['lcovonly', 'text-summary'],
+        combineBrowserReports  : true,
+        fixWebpackSourcePaths  : true,
+        skipFilesWithNoCoverage: true
     },
-    // Mocha reporter
-    // https://www.npmjs.com/package/karma-mocha-reporter
     mochaReporter: {
+        // https://www.npmjs.com/package/karma-mocha-reporter
         output: 'autowatch'
     },
-    port       : 9876,
-    colors     : true,
     autoWatch  : false,
-    singleRun  : true,
+    colors     : true,
     concurrency: Infinity,
-    // Avoid DISCONNECTED messages
-    browserDisconnectTimeout  : 10000,     // default 2000
-    browserDisconnectTolerance: 1,         // default 0
-    browserNoActivityTimeout  : 4*60*1000, //default 10000
-    captureTimeout            : 4*60*1000  //default 60000
-};
+    port       : 9876,
+    singleRun  : true,
 
-
-// Remote config
-// =============================================================================
-const remoteConfig = Object.assign({}, localConfig, {
-    // SauceLabs browers (see platform configurator below)
-    // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
-    customLaunchers: {
-        sl_chrome: {
-            base       : 'SauceLabs',
-            browserName: 'Chrome',
-            platform   : 'Windows 10',
-            version    : '26.0'
-        },
-        sl_edge: {
-            base       : 'SauceLabs',
-            browserName: 'MicrosoftEdge',
-            platform   : 'Windows 10',
-            version    : '13.10586'
-        },
-        sl_firefox: {
-            base       : 'SauceLabs',
-            browserName: 'Firefox',
-            platform   : 'Windows 10',
-            version    : '30'
-        },
-        sl_ie_11: {
-            base       : 'SauceLabs',
-            browserName: 'Internet Explorer',
-            platform   : 'Windows 10',
-            version    : '11.0'
-        },
-        sl_ie_10: {
-            base       : 'SauceLabs',
-            browserName: 'Internet Explorer',
-            platform   : 'Windows 8',
-            version    : '10.0'
-        },
-        sl_ie_9: {
-            base       : 'SauceLabs',
-            browserName: 'Internet Explorer',
-            platform   : 'Windows 7',
-            version    : '9.0'
-        },
-        sl_safari: {
-            base       : 'SauceLabs',
-            browserName: 'Safari',
-            platform   : 'OS X 10.10',
-            version    : '8.0'
+    // Prevent disconnect in Firefox/Safari
+    // https://support.saucelabs.com/hc/en-us/articles/225104707-Karma-Tests-Disconnect-Particularly-When-Running-Tests-on-Safari
+    browserDisconnectTimeout  : 1000*10, // default 2000
+    browserDisconnectTolerance: 1,       // default 0
+    browserNoActivityTimeout  : 1000*30, // default 10000
+    captureTimeout            : 1000*60, // default 60000
+    client: {
+        mocha: {
+            timeout: 1000*20 // default 2000
         }
-    },
-    // Set browsers to customLaunchers
-    get browsers() {
-        return Object.keys(this.customLaunchers);
-    },
-    // SauceLab settings
-    sauceLabs: {
-        username : saucelabs.username || process.env.SAUCE_USERNAME,
-        accessKey: saucelabs.accessKey || process.env.SAUCE_ACCESS_KEY,
-        testName : `${pkg.name} (karma)`
     }
-});
+};
 
 
 // Export
 // =============================================================================
 module.exports = function(config) {
-    const isRemote   = Boolean(process.argv.indexOf('--remote') > -1);
-    const testConfig = isRemote ? remoteConfig : localConfig;
+    const isRemote = Boolean(process.argv.indexOf('--remote') > -1);
 
+    // Remote test
     if (isRemote) {
-        // Disabled source maps to prevent SauceLabs timeouts
-        // https://github.com/karma-runner/karma-sauce-launcher/issues/95
-        testConfig.webpack.devtool = '';
-        testConfig.webpack.module.rules[0].use[0].options.sourceMap = false;
+        // Browsers
+        // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
+        settings.customLaunchers = {
+            sl_chrome: {
+                base       : 'SauceLabs',
+                browserName: 'Chrome',
+                platform   : 'Windows 10',
+                version    : '48.0'
+            },
+            sl_edge: {
+                base       : 'SauceLabs',
+                browserName: 'MicrosoftEdge',
+                platform   : 'Windows 10',
+                version    : '14.14393'
+            },
+            sl_firefox: {
+                base       : 'SauceLabs',
+                browserName: 'Firefox',
+                platform   : 'Windows 10',
+                version    : '32'
+            },
+            sl_ie_9: {
+                base       : 'SauceLabs',
+                browserName: 'Internet Explorer',
+                platform   : 'Windows 7',
+                version    : '9.0'
+            },
+            sl_safari: {
+                base       : 'SauceLabs',
+                browserName: 'Safari',
+                platform   : 'OS X 10.10',
+                version    : '8.0'
+            }
+        };
+        settings.browsers = Object.keys(settings.customLaunchers);
 
-        // Add SauceLabs reporter
-        testConfig.reporters.push('saucelabs');
+        // SauceLabs
+        settings.reporters.push('saucelabs');
+        settings.sauceLabs = {
+            username         : saucelabs.username || process.env.SAUCE_USERNAME,
+            accessKey        : saucelabs.accessKey || process.env.SAUCE_ACCESS_KEY,
+            testName         : `${pkg.name} (karma)`,
+            recordScreenshots: false,
+            recordVideo      : false
+        };
 
-        // Remove text-summary reporter
-        testConfig.coverageReporter.reporters = testConfig.coverageReporter.reporters.filter(obj => obj.type !== 'text-summary');
+        // Travis CI
+        if ('TRAVIS' in process.env) {
+            // Use custom hostname to prevent Safari disconnects
+            // https://support.saucelabs.com/hc/en-us/articles/115010079868-Issues-with-Safari-and-Karma-Test-Runner
+            settings.hostname = 'travis.dev';
+        }
     }
+    // Local
     else {
+        settings.browsers = ['ChromeHeadless'];
+        settings.webpack.devtool = 'inline-source-map';
+        settings.coverageIstanbulReporter.reports.push('html');
+
         // eslint-disable-next-line
         console.log([
             '============================================================\n',
-            `KARMA: localhost:${testConfig.port}/debug.html\n`,
+            `KARMA: localhost:${settings.port}/debug.html\n`,
             '============================================================\n'
         ].join(''));
     }
 
     // Logging: LOG_DISABLE, LOG_ERROR, LOG_WARN, LOG_INFO, LOG_DEBUG
-    testConfig.logLevel = config.LOG_WARN;
-    config.set(testConfig);
+    settings.logLevel = config.LOG_INFO;
+    config.set(settings);
 };

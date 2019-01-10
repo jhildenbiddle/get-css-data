@@ -1,5 +1,11 @@
+sudo: required
+dist: trusty
 language: node_js
 node_js: "stable"
+
+addons:
+  hosts:
+    - travis.dev
 
 notifications:
   email: false
@@ -7,7 +13,11 @@ notifications:
 before_install:
   - stty cols 80
 
-script: "npm run test-remote"
+script:
+  # Main repo
+  - if [ $TRAVIS_PULL_REQUEST = "false" ]; then npm run test-remote; fi
+  # Forks (Travis blocks encrypted environment variables, so no remote tests)
+  - if [ $TRAVIS_PULL_REQUEST != "false" ]; then npm test; fi
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -e TRAVIS_NODE_VERSION

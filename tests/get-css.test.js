@@ -28,7 +28,7 @@ function createElmsWrap(elmData, sharedOptions = {}) {
 // Suite
 // =============================================================================
 describe('get-css', function() {
-    const fixtures = {};
+    const fixtures = window.__FIXTURES__;
 
     // Hooks
     // -------------------------------------------------------------------------
@@ -48,28 +48,6 @@ describe('get-css', function() {
 
             require('./helpers/inject-test-component.js')();
         }
-    });
-
-    // Load Fixtures
-    before(async function() {
-        const fixtureBaseUrl = '/base/tests/fixtures/';
-        const fixtureUrls    = [
-            'style1.css',
-            'style2.css',
-            'style2.out.css',
-            'style3.css',
-            'style3.out.css'
-        ];
-
-        await axios.all(fixtureUrls.map(url => axios.get(`${fixtureBaseUrl}${url}`)))
-            .then(axios.spread(function (...responseArr) {
-                responseArr.forEach((response, i) => {
-                    const key = fixtureUrls[i];
-                    const val = response.data;
-
-                    fixtures[key] = val;
-                });
-            }));
     });
 
     // Remove <link> and <style> elements added for each test
@@ -139,6 +117,8 @@ describe('get-css', function() {
             getCss({
                 include: '[data-test]',
                 onComplete(cssText, cssArray, nodeArray) {
+                    cssText = cssText.replace(/\n/g, '');
+
                     expect(cssText).to.equal(expected);
                     done();
                 }
@@ -153,6 +133,8 @@ describe('get-css', function() {
             getCss({
                 include: '[data-test]',
                 onComplete(cssText, cssArray, nodeArray) {
+                    cssText = cssText.replace(/\n/g, '');
+
                     expect(cssText).to.equal(expected);
                     done();
                 }
@@ -238,6 +220,8 @@ describe('get-css', function() {
             getCss({
                 include: '[data-test]',
                 onComplete(cssText, cssArray, nodeArray) {
+                    cssText = cssText.replace(/\n/g, '');
+
                     expect(cssText).to.equal(expected);
                     done();
                 }
@@ -252,6 +236,8 @@ describe('get-css', function() {
             getCss({
                 include: '[data-test]',
                 onComplete(cssText, cssArray, nodeArray) {
+                    cssText = cssText.replace(/\n/g, '');
+
                     expect(cssText).to.equal(expected);
                     done();
                 }
