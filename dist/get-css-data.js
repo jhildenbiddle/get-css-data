@@ -2,11 +2,12 @@
  * get-css-data
  * v1.6.1
  * https://github.com/jhildenbiddle/get-css-data
- * (c) 2018 John Hildenbiddle <http://hildenbiddle.com>
+ * (c) 2018-2019 John Hildenbiddle <http://hildenbiddle.com>
  * MIT license
  */
 (function(global, factory) {
-    typeof exports === "object" && typeof module !== "undefined" ? module.exports = factory() : typeof define === "function" && define.amd ? define(factory) : global.getCssData = factory();
+    typeof exports === "object" && typeof module !== "undefined" ? module.exports = factory() : typeof define === "function" && define.amd ? define(factory) : (global = global || self, 
+    global.getCssData = factory());
 })(this, function() {
     "use strict";
     function getUrls(urls) {

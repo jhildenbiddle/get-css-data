@@ -358,4 +358,4 @@ getCss({
 
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/jhildenbiddle/get-css-data/blob/master/LICENSE) for details.
 
-Copyright (c) 2018 John Hildenbiddle ([@jhildenbiddle](https://twitter.com/jhildenbiddle))
+Copyright (c) John Hildenbiddle ([@jhildenbiddle](https://twitter.com/jhildenbiddle))
