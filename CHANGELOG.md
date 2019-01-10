@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.6.2
+
+*2019-01-09*
+
+- Updated preferred CDN link to jsdelivr.
+
 ## 1.6.1
 
 *2018-11-14*
