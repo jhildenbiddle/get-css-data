@@ -1,28 +1,14 @@
 // Dependencies
 // =============================================================================
-import axios      from 'axios';
-import createElms from 'create-elms';
-import getCss     from '../src/get-css';
-import { expect } from 'chai';
+import axios          from 'axios';
+import createTestElms from './helpers/create-test-elms';
+import getCss         from '../src/get-css';
+import { expect }     from 'chai';
 
 
 // Constants & Variables
 // =============================================================================
 const isIElte9 = document.all && !window.atob;
-
-
-// Helpers
-// =============================================================================
-function createElmsWrap(elmData, sharedOptions = {}) {
-    const isHeadElm = elmData.tag && ['link', 'style'].indexOf(elmData.tag) !== -1;
-
-    sharedOptions = Object.assign({}, {
-        attr    : Object.assign({ 'data-test': true }, sharedOptions.attr || {}),
-        appendTo: isHeadElm ? 'head' : 'body'
-    }, sharedOptions);
-
-    return createElms(elmData, sharedOptions);
-}
 
 
 // Suite
@@ -65,8 +51,8 @@ describe('get-css', function() {
     it('ignores invalid nodes (must be <link> or <style>)', function(done) {
         const styleCss = fixtures['style1.css'];
 
-        createElmsWrap('<div>Test</div>', { appendTo: 'body' });
-        createElmsWrap(`<style>${styleCss}</style>`);
+        createTestElms('<div>Test</div>', { appendTo: 'body' });
+        createTestElms(`<style>${styleCss}</style>`);
 
         getCss({
             include: '[data-test]',
@@ -84,7 +70,7 @@ describe('get-css', function() {
         it('returns CSS from single <style> node', function(done) {
             const styleCss = fixtures['style1.css'];
 
-            createElmsWrap(`<style>${styleCss}</style>`);
+            createTestElms(`<style>${styleCss}</style>`);
 
             getCss({
                 include: '[data-test]',
@@ -97,7 +83,7 @@ describe('get-css', function() {
 
         it('returns CSS from multiple <style> nodes', function(done) {
             const styleCss  = fixtures['style1.css'];
-            const styleElms = createElmsWrap(`<style>${styleCss}</style>`.repeat(2));
+            const styleElms = createTestElms(`<style>${styleCss}</style>`.repeat(2));
             const expected  = styleCss.repeat(styleElms.length);
 
             getCss({
@@ -111,7 +97,7 @@ describe('get-css', function() {
 
         it('returns CSS from multiple <style> nodes with single @import in same directory', function(done) {
             const styleCss = '@import "/base/tests/fixtures/style2.css";';
-            const styleElms = createElmsWrap(`<style>${styleCss}</style>`.repeat(2));
+            const styleElms = createTestElms(`<style>${styleCss}</style>`.repeat(2));
             const expected = fixtures['style2.out.css'].repeat(styleElms.length);
 
             getCss({
@@ -127,7 +113,7 @@ describe('get-css', function() {
 
         it('returns CSS from multiple <style> nodes with chained @imports in same directory', function(done) {
             const styleCss  = '@import "/base/tests/fixtures/style3.css";';
-            const styleElms = createElmsWrap(`<style>${styleCss}</style>`.repeat(2));
+            const styleElms = createTestElms(`<style>${styleCss}</style>`.repeat(2));
             const expected  = fixtures['style3.out.css'].repeat(styleElms.length);
 
             getCss({
@@ -145,7 +131,7 @@ describe('get-css', function() {
             const styleCss = '@import "/base/tests/fixtures/a/import.css";';
             const expected = fixtures['style1.css'].repeat(6);
 
-            createElmsWrap(`<style>${styleCss}</style>`.repeat(2));
+            createTestElms(`<style>${styleCss}</style>`.repeat(2));
 
             getCss({
                 include: '[data-test]',
@@ -166,7 +152,7 @@ describe('get-css', function() {
             const linkUrl  = '/base/tests/fixtures/style1.css';
             const expected = fixtures['style1.css'];
 
-            createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`);
+            createTestElms(`<link rel="stylesheet" href="${linkUrl}">`);
 
             getCss({
                 include: '[data-test]',
@@ -185,7 +171,7 @@ describe('get-css', function() {
                 axios.get(linkUrl)
                     .then(response => response.data)
                     .then(expected => {
-                        createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`);
+                        createTestElms(`<link rel="stylesheet" href="${linkUrl}">`);
 
                         getCss({
                             include: '[data-test]',
@@ -200,7 +186,7 @@ describe('get-css', function() {
 
         it('returns CSS from multiple <link> nodes', function(done) {
             const linkUrl  = '/base/tests/fixtures/style1.css';
-            const linkElms = createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));
+            const linkElms = createTestElms(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));
             const expected = fixtures['style1.css'].repeat(linkElms.length);
 
             getCss({
@@ -214,7 +200,7 @@ describe('get-css', function() {
 
         it('returns CSS from multiple <link> nodes with flat @import', function(done) {
             const linkUrl  = '/base/tests/fixtures/style2.css';
-            const linkElms = createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));
+            const linkElms = createTestElms(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));
             const expected = fixtures['style2.out.css'].repeat(linkElms.length);
 
             getCss({
@@ -230,7 +216,7 @@ describe('get-css', function() {
 
         it('returns CSS from multiple <link> nodes with nested @import', function(done) {
             const linkUrl  = '/base/tests/fixtures/style3.css';
-            const linkElms = createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));
+            const linkElms = createTestElms(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));
             const expected = fixtures['style3.out.css'].repeat(linkElms.length);
 
             getCss({
@@ -251,7 +237,7 @@ describe('get-css', function() {
     it('returns CSS From multile <link> and <style> nodes in <head> and <body>', function(done) {
         const linkUrl   = '/base/tests/fixtures/style1.css';
         const styleCss  = fixtures['style1.css'];
-        const elms      = createElmsWrap([
+        const elms      = createTestElms([
             { tag: 'link', attr: { rel: 'stylesheet', href: linkUrl }},
             { tag: 'link', attr: { rel: 'stylesheet', href: linkUrl }, appendTo: 'body' },
             { tag: 'style', text: styleCss },
@@ -274,7 +260,7 @@ describe('get-css', function() {
     describe('Options', function() {
         if (window.customElements) {
             it('options.rootElement', function(done) {
-                const customElm      = createElmsWrap({ tag: 'test-component', attr: { 'data-text': 'Custom Element' } })[0];
+                const customElm      = createTestElms({ tag: 'test-component', attr: { 'data-text': 'Custom Element' } })[0];
                 const shadowRoot     = customElm.shadowRoot;
                 const shadowStyleCss = shadowRoot.querySelector('style').textContent;
 
@@ -292,8 +278,8 @@ describe('get-css', function() {
             const linkUrl  = '/base/tests/fixtures/style1.css';
             const styleCss = fixtures['style1.css'];
 
-            createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`);
-            createElmsWrap(`<style>${styleCss}</style>`);
+            createTestElms(`<link rel="stylesheet" href="${linkUrl}">`);
+            createTestElms(`<style>${styleCss}</style>`);
 
             getCss({
                 include: '[data-test]',
@@ -309,8 +295,8 @@ describe('get-css', function() {
             const linkUrl  = '/base/tests/fixtures/style1.css';
             const styleCss = '.keepme { color: red; }';
 
-            createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`);
-            createElmsWrap(`<style>${styleCss}</style>`);
+            createTestElms(`<link rel="stylesheet" href="${linkUrl}">`);
+            createTestElms(`<style>${styleCss}</style>`);
 
             getCss({
                 include: '[data-test]',
@@ -324,7 +310,7 @@ describe('get-css', function() {
 
         it('options.useCSSOM', function(done) {
             const styleCss = fixtures['style1.css'];
-            const styleElm = createElmsWrap({ tag: 'style' })[0];
+            const styleElm = createTestElms({ tag: 'style' })[0];
 
             getCss({
                 include: '[data-test]',
@@ -354,7 +340,7 @@ describe('get-css', function() {
         it('triggers onBeforeSend callback for each @import', function(done) {
             let onBeforeSendCount = 0;
 
-            createElmsWrap({
+            createTestElms({
                 tag : 'style',
                 text: '@import "/base/tests/fixtures/style1.css";@import "/base/tests/fixtures/style2.css";'
             });
@@ -374,7 +360,7 @@ describe('get-css', function() {
         it('triggers onBeforeSend callback for each <link> node', function(done) {
             let onBeforeSendCount = 0;
 
-            createElmsWrap({
+            createTestElms({
                 tag : 'link',
                 attr: { rel: 'stylesheet', href: '/base/tests/fixtures/style1.css' }
             });
@@ -393,7 +379,7 @@ describe('get-css', function() {
 
         it('triggers onSuccess callback for each <style> node', function(done) {
             const styleCss  = fixtures['style1.css'];
-            const styleElms = createElmsWrap(`<style>${styleCss}</style>`.repeat(2));
+            const styleElms = createTestElms(`<style>${styleCss}</style>`.repeat(2));
 
             let onSuccessCount = 0;
 
@@ -414,7 +400,7 @@ describe('get-css', function() {
 
         it('triggers onSuccess callback for each <link> node', function(done) {
             const linkUrl  = '/base/tests/fixtures/style1.css';
-            const linkElms = createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));
+            const linkElms = createTestElms(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));
 
             let onSuccessCount = 0;
 
@@ -434,7 +420,7 @@ describe('get-css', function() {
         });
 
         it('filters CSS text based on onSuccess() value', function(done) {
-            const testElms = createElmsWrap([
+            const testElms = createTestElms([
                 '<style>.one { color: red; }</style>',
                 '<style>.two { color: green; }</style>',
                 '<style>.three { color: blue; }</style>',
@@ -463,8 +449,8 @@ describe('get-css', function() {
             const styleCss    = fixtures['style1.css'];
             const modifiedCss = '.modified { color: red; }';
 
-            createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`);
-            createElmsWrap(`<style>${styleCss}</style>`);
+            createTestElms(`<link rel="stylesheet" href="${linkUrl}">`);
+            createTestElms(`<style>${styleCss}</style>`);
 
             getCss({
                 include: '[data-test]',
@@ -480,7 +466,7 @@ describe('get-css', function() {
 
         it('triggers onError callback for each @import 404 error', function(done) {
             const styleCss = '@import "fail.css";';
-            const styleElms = createElmsWrap(`<style>${styleCss}</style>`.repeat(3));
+            const styleElms = createTestElms(`<style>${styleCss}</style>`.repeat(3));
 
             let onErrorCount = 0;
 
@@ -498,7 +484,7 @@ describe('get-css', function() {
 
         it('triggers onError callback for each <link> 404 error', function(done) {
             const linkUrl  = 'fail.css';
-            const linkElms = createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));
+            const linkElms = createTestElms(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));
 
             let onErrorCount = 0;
 
@@ -516,7 +502,7 @@ describe('get-css', function() {
 
         it('triggers onError callback for each invalid <link> XMLHttpRequest.responseText', function(done) {
             const linkUrl  = '/base/tests/fixtures/404.html';
-            const linkElms = createElmsWrap(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));
+            const linkElms = createTestElms(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));
 
             let onErrorCount = 0;
 
