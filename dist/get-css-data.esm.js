@@ -38,9 +38,16 @@ function getUrls(urls) {
         var parser = document.createElement("a");
         parser.setAttribute("href", url);
         parser.href = String(parser.href);
+        var parserHost = parser.host.split(":")[0];
         var isCrossDomain = parser.host !== location.host;
-        var isIElte9 = document.all && !window.atob;
+        var isIElte9 = Boolean(document.all && !window.atob);
         var isSameProtocol = parser.protocol === location.protocol;
+        console.log(JSON.stringify({
+            isCrossDomain: isCrossDomain,
+            "location.host": location.host,
+            "parser.host": parser.host,
+            parserHost: parserHost
+        }));
         if (isCrossDomain && isIElte9) {
             if (isSameProtocol) {
                 var xdr = new XDomainRequest();

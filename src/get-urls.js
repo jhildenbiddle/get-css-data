@@ -59,18 +59,19 @@ function getUrls(urls, options = {}) {
 
     // Main
     // -------------------------------------------------------------------------
-    urlArray.forEach((url, i) => {
-        const parser = document.createElement('a');
+    const parser = document.createElement('a');
 
+    urlArray.forEach((url, i) => {
         parser.setAttribute('href', url);
         parser.href = String(parser.href);
 
-        const isCrossDomain  = parser.host !== location.host;
-        const isIElte9       = document.all && !window.atob;
-        const isSameProtocol = parser.protocol === location.protocol;
+        const isIElte9     = Boolean(document.all && !window.atob);
+        const isIElte9CORS = isIElte9 && parser.host.split(':')[0] !== location.host.split(':')[0];
 
         // IE 9 CORS
-        if (isCrossDomain && isIElte9) {
+        if (isIElte9CORS) {
+            const isSameProtocol = parser.protocol === location.protocol;
+
             if (isSameProtocol) {
                 const xdr = new XDomainRequest();
 
@@ -100,7 +101,7 @@ function getUrls(urls, options = {}) {
             }
             else {
                 // eslint-disable-next-line
-                console.log('Internet Explorer 9 Cross-Origin (CORS) requests must use the same protocol');
+                console.warn(`Internet Explorer 9 Cross-Origin (CORS) requests must use the same protocol (${url})`);
                 onError(null, i);
             }
         }

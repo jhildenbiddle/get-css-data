@@ -163,16 +163,25 @@ describe('get-css', function() {
             });
         });
 
-        // Skip for IE9 which requires CORS request to use same protocol
-        if (!isIElte9) {
-            it('returns CSS from single <link> node via CORS', function(done) {
-                const linkUrl = 'https://unpkg.com/get-css-data@1.0.0/tests/fixtures/style1.css';
+        it('returns CSS from single <link> node via CORS', function(done) {
+            const linkProtocol = 'https:';
+            const linkUrl      = `${linkProtocol}//cdn.jsdelivr.net/npm/get-css-data@1.0.0/tests/fixtures/style1.css`;
 
+            createTestElms(`<link rel="stylesheet" href="${linkUrl}">`);
+
+            // IE9 does not support CORS requests with different protocol
+            if (isIElte9 & location.protocol !== linkProtocol) {
+                getCss({
+                    include: '[data-test]',
+                    onError(xhr, node, url) {
+                        done();
+                    }
+                });
+            }
+            else {
                 axios.get(linkUrl)
                     .then(response => response.data)
                     .then(expected => {
-                        createTestElms(`<link rel="stylesheet" href="${linkUrl}">`);
-
                         getCss({
                             include: '[data-test]',
                             onComplete(cssText, cssArray, nodeArray) {
@@ -181,8 +190,8 @@ describe('get-css', function() {
                             }
                         });
                     });
-            });
-        }
+            }
+        });
 
         it('returns CSS from multiple <link> nodes', function(done) {
             const linkUrl  = '/base/tests/fixtures/style1.css';
