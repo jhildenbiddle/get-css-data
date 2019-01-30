@@ -39,21 +39,14 @@
                 settings.onComplete(urlQueue);
             }
         }
+        var parser = document.createElement("a");
         urlArray.forEach(function(url, i) {
-            var parser = document.createElement("a");
             parser.setAttribute("href", url);
             parser.href = String(parser.href);
-            var parserHost = parser.host.split(":")[0];
-            var isCrossDomain = parser.host !== location.host;
             var isIElte9 = Boolean(document.all && !window.atob);
-            var isSameProtocol = parser.protocol === location.protocol;
-            console.log(JSON.stringify({
-                isCrossDomain: isCrossDomain,
-                "location.host": location.host,
-                "parser.host": parser.host,
-                parserHost: parserHost
-            }));
-            if (isCrossDomain && isIElte9) {
+            var isIElte9CORS = isIElte9 && parser.host.split(":")[0] !== location.host.split(":")[0];
+            if (isIElte9CORS) {
+                var isSameProtocol = parser.protocol === location.protocol;
                 if (isSameProtocol) {
                     var xdr = new XDomainRequest();
                     xdr.open("GET", url);
@@ -74,7 +67,7 @@
                         xdr.send();
                     }, 0);
                 } else {
-                    console.log("Internet Explorer 9 Cross-Origin (CORS) requests must use the same protocol");
+                    console.warn("Internet Explorer 9 Cross-Origin (CORS) requests must use the same protocol (".concat(url, ")"));
                     onError(null, i);
                 }
             } else {
