@@ -2,7 +2,7 @@
  * get-css-data
  * v1.6.3
  * https://github.com/jhildenbiddle/get-css-data
- * (c) 2018-2019 John Hildenbiddle <http://hildenbiddle.com>
+ * (c) 2018-2020 John Hildenbiddle <http://hildenbiddle.com>
  * MIT license
  */
 function getUrls(urls) {
@@ -15,9 +15,9 @@ function getUrls(urls) {
         onComplete: options.onComplete || Function.prototype
     };
     var urlArray = Array.isArray(urls) ? urls : [ urls ];
-    var urlQueue = Array.apply(null, Array(urlArray.length)).map(function(x) {
+    var urlQueue = Array.apply(null, Array(urlArray.length)).map((function(x) {
         return null;
-    });
+    }));
     function isValidCss() {
         var cssText = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
         var isHTML = cssText.trim().charAt(0) === "<";
@@ -35,7 +35,7 @@ function getUrls(urls) {
         }
     }
     var parser = document.createElement("a");
-    urlArray.forEach(function(url, i) {
+    urlArray.forEach((function(url, i) {
         parser.setAttribute("href", url);
         parser.href = String(parser.href);
         var isIElte9 = Boolean(document.all && !window.atob);
@@ -43,7 +43,7 @@ function getUrls(urls) {
         if (isIElte9CORS) {
             var isSameProtocol = parser.protocol === location.protocol;
             if (isSameProtocol) {
-                var xdr = new XDomainRequest();
+                var xdr = new XDomainRequest;
                 xdr.open("GET", url);
                 xdr.timeout = 0;
                 xdr.onprogress = Function.prototype;
@@ -58,15 +58,15 @@ function getUrls(urls) {
                 xdr.onerror = function(err) {
                     onError(xdr, i);
                 };
-                setTimeout(function() {
+                setTimeout((function() {
                     xdr.send();
-                }, 0);
+                }), 0);
             } else {
                 console.warn("Internet Explorer 9 Cross-Origin (CORS) requests must use the same protocol (".concat(url, ")"));
                 onError(null, i);
             }
         } else {
-            var xhr = new XMLHttpRequest();
+            var xhr = new XMLHttpRequest;
             xhr.open("GET", url);
             if (settings.mimeType && xhr.overrideMimeType) {
                 xhr.overrideMimeType(settings.mimeType);
@@ -83,7 +83,7 @@ function getUrls(urls) {
             };
             xhr.send();
         }
-    });
+    }));
 }
 
 /**
@@ -160,12 +160,12 @@ function getUrls(urls) {
         onError: options.onError || Function.prototype,
         onComplete: options.onComplete || Function.prototype
     };
-    var sourceNodes = Array.apply(null, settings.rootElement.querySelectorAll(settings.include)).filter(function(node) {
+    var sourceNodes = Array.apply(null, settings.rootElement.querySelectorAll(settings.include)).filter((function(node) {
         return !matchesSelector(node, settings.exclude);
-    });
-    var cssArray = Array.apply(null, Array(sourceNodes.length)).map(function(x) {
+    }));
+    var cssArray = Array.apply(null, Array(sourceNodes.length)).map((function(x) {
         return null;
-    });
+    }));
     function handleComplete() {
         var isComplete = cssArray.indexOf(null) === -1;
         if (isComplete) {
@@ -176,11 +176,11 @@ function getUrls(urls) {
     function handleSuccess(cssText, cssIndex, node, sourceUrl) {
         var returnVal = settings.onSuccess(cssText, node, sourceUrl);
         cssText = returnVal !== undefined && Boolean(returnVal) === false ? "" : returnVal || cssText;
-        resolveImports(cssText, node, sourceUrl, function(resolvedCssText, errorData) {
+        resolveImports(cssText, node, sourceUrl, (function(resolvedCssText, errorData) {
             if (cssArray[cssIndex] === null) {
-                errorData.forEach(function(data) {
+                errorData.forEach((function(data) {
                     return settings.onError(data.xhr, node, data.url);
-                });
+                }));
                 if (!settings.filter || settings.filter.test(resolvedCssText)) {
                     cssArray[cssIndex] = resolvedCssText;
                 } else {
@@ -188,25 +188,25 @@ function getUrls(urls) {
                 }
                 handleComplete();
             }
-        });
+        }));
     }
     function parseImportData(cssText, baseUrl) {
         var ignoreRules = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
         var importData = {};
-        importData.rules = (cssText.replace(regex.cssComments, "").match(regex.cssImports) || []).filter(function(rule) {
+        importData.rules = (cssText.replace(regex.cssComments, "").match(regex.cssImports) || []).filter((function(rule) {
             return ignoreRules.indexOf(rule) === -1;
-        });
-        importData.urls = importData.rules.map(function(rule) {
+        }));
+        importData.urls = importData.rules.map((function(rule) {
             return rule.replace(regex.cssImports, "$1");
-        });
-        importData.absoluteUrls = importData.urls.map(function(url) {
+        }));
+        importData.absoluteUrls = importData.urls.map((function(url) {
             return getFullUrl(url, baseUrl);
-        });
-        importData.absoluteRules = importData.rules.map(function(rule, i) {
+        }));
+        importData.absoluteRules = importData.rules.map((function(rule, i) {
             var oldUrl = importData.urls[i];
             var newUrl = getFullUrl(importData.absoluteUrls[i], baseUrl);
             return rule.replace(oldUrl, newUrl);
-        });
+        }));
         return importData;
     }
     function resolveImports(cssText, node, baseUrl, callbackFn) {
@@ -222,9 +222,9 @@ function getUrls(urls) {
                     var returnVal = settings.onSuccess(cssText, node, url);
                     cssText = returnVal === false ? "" : returnVal || cssText;
                     var responseImportData = parseImportData(cssText, url, __errorRules);
-                    responseImportData.rules.forEach(function(rule, i) {
+                    responseImportData.rules.forEach((function(rule, i) {
                         cssText = cssText.replace(rule, responseImportData.absoluteRules[i]);
-                    });
+                    }));
                     return cssText;
                 },
                 onError: function onError(xhr, url, urlIndex) {
@@ -236,9 +236,9 @@ function getUrls(urls) {
                     resolveImports(cssText, node, baseUrl, callbackFn, __errorData, __errorRules);
                 },
                 onComplete: function onComplete(responseArray) {
-                    responseArray.forEach(function(importText, i) {
+                    responseArray.forEach((function(importText, i) {
                         cssText = cssText.replace(importData.rules[i], importText);
-                    });
+                    }));
                     resolveImports(cssText, node, baseUrl, callbackFn, __errorData, __errorRules);
                 }
             });
@@ -247,7 +247,7 @@ function getUrls(urls) {
         }
     }
     if (sourceNodes.length) {
-        sourceNodes.forEach(function(node, i) {
+        sourceNodes.forEach((function(node, i) {
             var linkHref = node.getAttribute("href");
             var linkRel = node.getAttribute("rel");
             var isLink = node.nodeName === "LINK" && linkHref && linkRel && linkRel.toLowerCase() === "stylesheet";
@@ -271,16 +271,16 @@ function getUrls(urls) {
             } else if (isStyle) {
                 var cssText = node.textContent;
                 if (settings.useCSSOM) {
-                    cssText = Array.apply(null, node.sheet.cssRules).map(function(rule) {
+                    cssText = Array.apply(null, node.sheet.cssRules).map((function(rule) {
                         return rule.cssText;
-                    }).join("");
+                    })).join("");
                 }
                 handleSuccess(cssText, i, node, location.href);
             } else {
                 cssArray[i] = "";
                 handleComplete();
             }
-        });
+        }));
     } else {
         settings.onComplete("", []);
     }

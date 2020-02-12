@@ -103,8 +103,6 @@ describe('get-css', function() {
             getCss({
                 include: '[data-test]',
                 onComplete(cssText, cssArray, nodeArray) {
-                    cssText = cssText.replace(/\n/g, '');
-
                     expect(cssText).to.equal(expected);
                     done();
                 }
@@ -119,8 +117,6 @@ describe('get-css', function() {
             getCss({
                 include: '[data-test]',
                 onComplete(cssText, cssArray, nodeArray) {
-                    cssText = cssText.replace(/\n/g, '');
-
                     expect(cssText).to.equal(expected);
                     done();
                 }
@@ -137,6 +133,7 @@ describe('get-css', function() {
                 include: '[data-test]',
                 onComplete(cssText, cssArray, nodeArray) {
                     cssText = cssText.replace(/\n/g, '');
+
                     expect(cssText).to.equal(expected);
                     done();
                 }
@@ -215,8 +212,6 @@ describe('get-css', function() {
             getCss({
                 include: '[data-test]',
                 onComplete(cssText, cssArray, nodeArray) {
-                    cssText = cssText.replace(/\n/g, '');
-
                     expect(cssText).to.equal(expected);
                     done();
                 }
@@ -231,8 +226,6 @@ describe('get-css', function() {
             getCss({
                 include: '[data-test]',
                 onComplete(cssText, cssArray, nodeArray) {
-                    cssText = cssText.replace(/\n/g, '');
-
                     expect(cssText).to.equal(expected);
                     done();
                 }
