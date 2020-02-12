@@ -5,45 +5,41 @@
  * (c) 2018-2020 John Hildenbiddle <http://hildenbiddle.com>
  * MIT license
  */
-function getUrls(urls) {
-    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    var settings = {
+function getUrls(urls, options = {}) {
+    const settings = {
         mimeType: options.mimeType || null,
         onBeforeSend: options.onBeforeSend || Function.prototype,
         onSuccess: options.onSuccess || Function.prototype,
         onError: options.onError || Function.prototype,
         onComplete: options.onComplete || Function.prototype
     };
-    var urlArray = Array.isArray(urls) ? urls : [ urls ];
-    var urlQueue = Array.apply(null, Array(urlArray.length)).map((function(x) {
-        return null;
-    }));
-    function isValidCss() {
-        var cssText = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
-        var isHTML = cssText.trim().charAt(0) === "<";
+    const urlArray = Array.isArray(urls) ? urls : [ urls ];
+    const urlQueue = Array.apply(null, Array(urlArray.length)).map(x => null);
+    function isValidCss(cssText = "") {
+        const isHTML = cssText.trim().charAt(0) === "<";
         return !isHTML;
     }
     function onError(xhr, urlIndex) {
         settings.onError(xhr, urlArray[urlIndex], urlIndex);
     }
     function onSuccess(responseText, urlIndex) {
-        var returnVal = settings.onSuccess(responseText, urlArray[urlIndex], urlIndex);
+        const returnVal = settings.onSuccess(responseText, urlArray[urlIndex], urlIndex);
         responseText = returnVal === false ? "" : returnVal || responseText;
         urlQueue[urlIndex] = responseText;
         if (urlQueue.indexOf(null) === -1) {
             settings.onComplete(urlQueue);
         }
     }
-    var parser = document.createElement("a");
-    urlArray.forEach((function(url, i) {
+    const parser = document.createElement("a");
+    urlArray.forEach((url, i) => {
         parser.setAttribute("href", url);
         parser.href = String(parser.href);
-        var isIElte9 = Boolean(document.all && !window.atob);
-        var isIElte9CORS = isIElte9 && parser.host.split(":")[0] !== location.host.split(":")[0];
+        const isIElte9 = Boolean(document.all && !window.atob);
+        const isIElte9CORS = isIElte9 && parser.host.split(":")[0] !== location.host.split(":")[0];
         if (isIElte9CORS) {
-            var isSameProtocol = parser.protocol === location.protocol;
+            const isSameProtocol = parser.protocol === location.protocol;
             if (isSameProtocol) {
-                var xdr = new XDomainRequest;
+                const xdr = new XDomainRequest;
                 xdr.open("GET", url);
                 xdr.timeout = 0;
                 xdr.onprogress = Function.prototype;
@@ -62,11 +58,11 @@ function getUrls(urls) {
                     xdr.send();
                 }), 0);
             } else {
-                console.warn("Internet Explorer 9 Cross-Origin (CORS) requests must use the same protocol (".concat(url, ")"));
+                console.warn(`Internet Explorer 9 Cross-Origin (CORS) requests must use the same protocol (${url})`);
                 onError(null, i);
             }
         } else {
-            var xhr = new XMLHttpRequest;
+            const xhr = new XMLHttpRequest;
             xhr.open("GET", url);
             if (settings.mimeType && xhr.overrideMimeType) {
                 xhr.overrideMimeType(settings.mimeType);
@@ -83,7 +79,7 @@ function getUrls(urls) {
             };
             xhr.send();
         }
-    }));
+    });
 }
 
 /**
@@ -145,11 +141,11 @@ function getUrls(urls) {
  *     }
  *   });
  */ function getCssData(options) {
-    var regex = {
+    const regex = {
         cssComments: /\/\*[\s\S]+?\*\//g,
         cssImports: /(?:@import\s*)(?:url\(\s*)?(?:['"])([^'"]*)(?:['"])(?:\s*\))?(?:[^;]*;)/g
     };
-    var settings = {
+    const settings = {
         rootElement: options.rootElement || document,
         include: options.include || 'style,link[rel="stylesheet"]',
         exclude: options.exclude || null,
@@ -160,27 +156,21 @@ function getUrls(urls) {
         onError: options.onError || Function.prototype,
         onComplete: options.onComplete || Function.prototype
     };
-    var sourceNodes = Array.apply(null, settings.rootElement.querySelectorAll(settings.include)).filter((function(node) {
-        return !matchesSelector(node, settings.exclude);
-    }));
-    var cssArray = Array.apply(null, Array(sourceNodes.length)).map((function(x) {
-        return null;
-    }));
+    const sourceNodes = Array.apply(null, settings.rootElement.querySelectorAll(settings.include)).filter(node => !matchesSelector(node, settings.exclude));
+    const cssArray = Array.apply(null, Array(sourceNodes.length)).map(x => null);
     function handleComplete() {
-        var isComplete = cssArray.indexOf(null) === -1;
+        const isComplete = cssArray.indexOf(null) === -1;
         if (isComplete) {
-            var cssText = cssArray.join("");
+            const cssText = cssArray.join("");
             settings.onComplete(cssText, cssArray, sourceNodes);
         }
     }
     function handleSuccess(cssText, cssIndex, node, sourceUrl) {
-        var returnVal = settings.onSuccess(cssText, node, sourceUrl);
+        const returnVal = settings.onSuccess(cssText, node, sourceUrl);
         cssText = returnVal !== undefined && Boolean(returnVal) === false ? "" : returnVal || cssText;
         resolveImports(cssText, node, sourceUrl, (function(resolvedCssText, errorData) {
             if (cssArray[cssIndex] === null) {
-                errorData.forEach((function(data) {
-                    return settings.onError(data.xhr, node, data.url);
-                }));
+                errorData.forEach(data => settings.onError(data.xhr, node, data.url));
                 if (!settings.filter || settings.filter.test(resolvedCssText)) {
                     cssArray[cssIndex] = resolvedCssText;
                 } else {
@@ -190,44 +180,35 @@ function getUrls(urls) {
             }
         }));
     }
-    function parseImportData(cssText, baseUrl) {
-        var ignoreRules = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
-        var importData = {};
-        importData.rules = (cssText.replace(regex.cssComments, "").match(regex.cssImports) || []).filter((function(rule) {
-            return ignoreRules.indexOf(rule) === -1;
-        }));
-        importData.urls = importData.rules.map((function(rule) {
-            return rule.replace(regex.cssImports, "$1");
-        }));
-        importData.absoluteUrls = importData.urls.map((function(url) {
-            return getFullUrl(url, baseUrl);
-        }));
-        importData.absoluteRules = importData.rules.map((function(rule, i) {
-            var oldUrl = importData.urls[i];
-            var newUrl = getFullUrl(importData.absoluteUrls[i], baseUrl);
+    function parseImportData(cssText, baseUrl, ignoreRules = []) {
+        const importData = {};
+        importData.rules = (cssText.replace(regex.cssComments, "").match(regex.cssImports) || []).filter(rule => ignoreRules.indexOf(rule) === -1);
+        importData.urls = importData.rules.map(rule => rule.replace(regex.cssImports, "$1"));
+        importData.absoluteUrls = importData.urls.map(url => getFullUrl(url, baseUrl));
+        importData.absoluteRules = importData.rules.map((rule, i) => {
+            const oldUrl = importData.urls[i];
+            const newUrl = getFullUrl(importData.absoluteUrls[i], baseUrl);
             return rule.replace(oldUrl, newUrl);
-        }));
+        });
         return importData;
     }
-    function resolveImports(cssText, node, baseUrl, callbackFn) {
-        var __errorData = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : [];
-        var __errorRules = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : [];
-        var importData = parseImportData(cssText, baseUrl, __errorRules);
+    function resolveImports(cssText, node, baseUrl, callbackFn, __errorData = [], __errorRules = []) {
+        const importData = parseImportData(cssText, baseUrl, __errorRules);
         if (importData.rules.length) {
             getUrls(importData.absoluteUrls, {
-                onBeforeSend: function onBeforeSend(xhr, url, urlIndex) {
+                onBeforeSend(xhr, url, urlIndex) {
                     settings.onBeforeSend(xhr, node, url);
                 },
-                onSuccess: function onSuccess(cssText, url, urlIndex) {
-                    var returnVal = settings.onSuccess(cssText, node, url);
+                onSuccess(cssText, url, urlIndex) {
+                    const returnVal = settings.onSuccess(cssText, node, url);
                     cssText = returnVal === false ? "" : returnVal || cssText;
-                    var responseImportData = parseImportData(cssText, url, __errorRules);
-                    responseImportData.rules.forEach((function(rule, i) {
+                    const responseImportData = parseImportData(cssText, url, __errorRules);
+                    responseImportData.rules.forEach((rule, i) => {
                         cssText = cssText.replace(rule, responseImportData.absoluteRules[i]);
-                    }));
+                    });
                     return cssText;
                 },
-                onError: function onError(xhr, url, urlIndex) {
+                onError(xhr, url, urlIndex) {
                     __errorData.push({
                         xhr: xhr,
                         url: url
@@ -235,10 +216,10 @@ function getUrls(urls) {
                     __errorRules.push(importData.rules[urlIndex]);
                     resolveImports(cssText, node, baseUrl, callbackFn, __errorData, __errorRules);
                 },
-                onComplete: function onComplete(responseArray) {
-                    responseArray.forEach((function(importText, i) {
+                onComplete(responseArray) {
+                    responseArray.forEach((importText, i) => {
                         cssText = cssText.replace(importData.rules[i], importText);
-                    }));
+                    });
                     resolveImports(cssText, node, baseUrl, callbackFn, __errorData, __errorRules);
                 }
             });
@@ -247,50 +228,47 @@ function getUrls(urls) {
         }
     }
     if (sourceNodes.length) {
-        sourceNodes.forEach((function(node, i) {
-            var linkHref = node.getAttribute("href");
-            var linkRel = node.getAttribute("rel");
-            var isLink = node.nodeName === "LINK" && linkHref && linkRel && linkRel.toLowerCase() === "stylesheet";
-            var isStyle = node.nodeName === "STYLE";
+        sourceNodes.forEach((node, i) => {
+            const linkHref = node.getAttribute("href");
+            const linkRel = node.getAttribute("rel");
+            const isLink = node.nodeName === "LINK" && linkHref && linkRel && linkRel.toLowerCase() === "stylesheet";
+            const isStyle = node.nodeName === "STYLE";
             if (isLink) {
                 getUrls(linkHref, {
                     mimeType: "text/css",
-                    onBeforeSend: function onBeforeSend(xhr, url, urlIndex) {
+                    onBeforeSend(xhr, url, urlIndex) {
                         settings.onBeforeSend(xhr, node, url);
                     },
-                    onSuccess: function onSuccess(cssText, url, urlIndex) {
-                        var sourceUrl = getFullUrl(linkHref, location.href);
+                    onSuccess(cssText, url, urlIndex) {
+                        const sourceUrl = getFullUrl(linkHref, location.href);
                         handleSuccess(cssText, i, node, sourceUrl);
                     },
-                    onError: function onError(xhr, url, urlIndex) {
+                    onError(xhr, url, urlIndex) {
                         cssArray[i] = "";
                         settings.onError(xhr, node, url);
                         handleComplete();
                     }
                 });
             } else if (isStyle) {
-                var cssText = node.textContent;
+                let cssText = node.textContent;
                 if (settings.useCSSOM) {
-                    cssText = Array.apply(null, node.sheet.cssRules).map((function(rule) {
-                        return rule.cssText;
-                    })).join("");
+                    cssText = Array.apply(null, node.sheet.cssRules).map(rule => rule.cssText).join("");
                 }
                 handleSuccess(cssText, i, node, location.href);
             } else {
                 cssArray[i] = "";
                 handleComplete();
             }
-        }));
+        });
     } else {
         settings.onComplete("", []);
     }
 }
 
-function getFullUrl(url) {
-    var base = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : location.href;
-    var d = document.implementation.createHTMLDocument("");
-    var b = d.createElement("base");
-    var a = d.createElement("a");
+function getFullUrl(url, base = location.href) {
+    const d = document.implementation.createHTMLDocument("");
+    const b = d.createElement("base");
+    const a = d.createElement("a");
     d.head.appendChild(b);
     d.body.appendChild(a);
     b.href = base;
@@ -299,7 +277,7 @@ function getFullUrl(url) {
 }
 
 function matchesSelector(elm, selector) {
-    var matches = elm.matches || elm.matchesSelector || elm.webkitMatchesSelector || elm.mozMatchesSelector || elm.msMatchesSelector || elm.oMatchesSelector;
+    const matches = elm.matches || elm.matchesSelector || elm.webkitMatchesSelector || elm.mozMatchesSelector || elm.msMatchesSelector || elm.oMatchesSelector;
     return matches.call(elm, selector);
 }
 
