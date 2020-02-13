@@ -108,7 +108,7 @@ p { color: green; }
 JavaScript (see [Options](#options) for details)
 
 ```javascript
-getCss({
+getCssData({
   onComplete(cssText, cssArray, nodeArray) {
     console.log(cssText); // 1
     console.log(cssArray); // 2
@@ -266,7 +266,7 @@ Callback before each [XMLHttpRequest](https://developer.mozilla.org/en-US/docs/W
 **Example**
 
 ```javascript
-getCss({
+getCssData({
   onBeforeSend(xhr, node, url) {
     // Domain-specific XHR settings
     if (/some-domain.com/.test(url)) {
@@ -293,7 +293,7 @@ Note that the order in which `<link>` and `@import` CSS data is "successfully" c
 **Example**
 
 ```javascript
-getCss({
+getCssData({
   onSuccess(cssText, node, url) {
     // Replace all instances of "color: red" with "color: blue"
     const newCssText = cssText.replace(/color:\s*red\s;/g, 'color: blue;');
@@ -317,7 +317,7 @@ Callback after `<link>` or `@import` request has failed or when
 **Example**
 
 ```javascript
-getCss({
+getCssData({
   onError(xhr, node, url) {
     console.log(xhr.status); // 1
     console.log(xhr.statusText); // 2
@@ -341,7 +341,7 @@ Callback after CSS data has been collected from all nodes.
 **Example**
 
 ```javascript
-getCss({
+getCssData({
   onComplete(cssText, cssArray, nodeArray) {
     // ...
   }
