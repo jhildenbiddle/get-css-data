@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.7.0
+
+*2020-02-12*
+
+- Added support for HTML `<base>` tag (#3)
+
 ## 1.6.3
 
 *2019-01-30*
