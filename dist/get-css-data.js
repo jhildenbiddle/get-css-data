@@ -263,7 +263,7 @@
                             settings.onBeforeSend(xhr, node, url);
                         },
                         onSuccess: function onSuccess(cssText, url, urlIndex) {
-                            var sourceUrl = getFullUrl(linkHref, location.href);
+                            var sourceUrl = getFullUrl(linkHref);
                             handleSuccess(cssText, i, node, sourceUrl);
                         },
                         onError: function onError(xhr, url, urlIndex) {
@@ -289,14 +289,13 @@
             settings.onComplete("", []);
         }
     }
-    function getFullUrl(url) {
-        var base = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : location.href;
+    function getFullUrl(url, base) {
         var d = document.implementation.createHTMLDocument("");
         var b = d.createElement("base");
         var a = d.createElement("a");
         d.head.appendChild(b);
         d.body.appendChild(a);
-        b.href = base;
+        b.href = base || document.baseURI || (document.querySelector("base") || {}).href || location.href;
         a.href = url;
         return a.href;
     }

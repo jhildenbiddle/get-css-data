@@ -253,7 +253,7 @@ function getCssData(options) {
                     },
                     onSuccess(cssText, url, urlIndex) {
                         // Convert relative linkHref to absolute url
-                        const sourceUrl = getFullUrl(linkHref, location.href);
+                        const sourceUrl = getFullUrl(linkHref);
 
                         handleSuccess(cssText, i, node, sourceUrl);
                     },
@@ -293,17 +293,17 @@ function getCssData(options) {
  * Returns fully qualified URL from relative URL and (optional) base URL
  *
  * @param {any} url
- * @param {any} [base=location.href]
+ * @param {any} base
  * @returns
  */
-function getFullUrl(url, base = location.href) {
+function getFullUrl(url, base) {
     const d = document.implementation.createHTMLDocument('');
     const b = d.createElement('base');
     const a = d.createElement('a');
 
     d.head.appendChild(b);
     d.body.appendChild(a);
-    b.href = base;
+    b.href = base || document.baseURI || (document.querySelector('base') || {}).href || location.href;
     a.href = url;
 
     return a.href;
