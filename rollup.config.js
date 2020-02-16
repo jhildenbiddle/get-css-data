@@ -85,7 +85,8 @@ const config = {
         resolve(),
         commonjs(),
         json(),
-        eslint(pluginSettings.eslint)
+        eslint(pluginSettings.eslint),
+        babel(pluginSettings.babel)
     ],
     watch: {
         clearScreen: false
@@ -122,7 +123,6 @@ const umd = merge({}, config, {
         format: 'umd'
     },
     plugins: config.plugins.concat([
-        babel(pluginSettings.babel),
         terser(pluginSettings.terser.beautify)
     ])
 });
@@ -134,7 +134,6 @@ const umdMinified = merge({}, config, {
         format: umd.output.format
     },
     plugins: config.plugins.concat([
-        babel(pluginSettings.babel),
         terser(pluginSettings.terser.minify)
     ])
 });
