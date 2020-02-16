@@ -1,10 +1,17 @@
 # Change Log
 
+## 1.7.1
+
+*2020-02-15*
+
+- Restored babel transpilation for ES modules (removed in 1.7.0)
+
 ## 1.7.0
 
 *2020-02-12*
 
 - Added support for HTML `<base>` tag (#3)
+- Removed babel transpilation for ES modules
 
 ## 1.6.3
 
