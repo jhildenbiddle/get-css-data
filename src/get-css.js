@@ -21,7 +21,7 @@ import getUrls from './get-urls';
  * @param {object}   [options.filter] Regular expression used to filter node CSS
  *                   data. Each block of CSS data is tested against the filter,
  *                   and only matching data is included.
- * @param {object}   [options.useCSSOM=false] Determines if CSS data will be
+ * @param {boolean}  [options.useCSSOM=false] Determines if CSS data will be
  *                   collected from a stylesheet's runtime values instead of its
  *                   text content. This is required to get accurate CSS data
  *                   when a stylesheet has been modified using the deleteRule()
@@ -45,11 +45,11 @@ import getUrls from './get-urls';
  * @example
  *
  *   getCssData({
- *     rootElement: document,
- *     include    : 'style,link[rel="stylesheet"]',
- *     exclude    : '[href="skip.css"]',
- *     filter     : /red/,
- *     useCSSOM   : false,
+ *     rootElement : document,
+ *     include     : 'style,link[rel="stylesheet"]',
+ *     exclude     : '[href="skip.css"]',
+ *     filter      : /red/,
+ *     useCSSOM    : false,
  *     onBeforeSend(xhr, node, url) {
  *       // ...
  *     }
