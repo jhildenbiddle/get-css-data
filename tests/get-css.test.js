@@ -236,7 +236,7 @@ describe('get-css', function() {
 
     // Tests: <link> & <style> CSS
     // -------------------------------------------------------------------------
-    it('returns CSS From multile <link> and <style> nodes in <head> and <body>', function(done) {
+    it('returns CSS From multiple <link> and <style> nodes in <head> and <body>', function(done) {
         const linkUrl   = '/base/tests/fixtures/style1.css';
         const styleCss  = fixtures['style1.css'];
         const elms      = createTestElms([
@@ -421,7 +421,7 @@ describe('get-css', function() {
             });
         });
 
-        it('filters CSS text based on onSuccess() value', function(done) {
+        it('filters CSS text based on onSuccess() return value', function(done) {
             const testElms = createTestElms([
                 '<style>.one { color: red; }</style>',
                 '<style>.two { color: green; }</style>',
