@@ -45,8 +45,11 @@ npm install get-css-data --save
 ```javascript
 // file.js
 import getCssData from 'get-css-data';
+
 getCssData({
-  // ...
+  onComplete: function(cssText, cssArray, nodeArray) {
+    // Do stuff...
+  }
 });
 ```
 
@@ -63,7 +66,9 @@ CDN ([jsdelivr.com](https://www.jsdelivr.com/) shown, also on [unpkg.com](https:
 <script src="https://cdn.jsdelivr.net/npm/get-css-data@1"></script>
 <script>
   getCssData({
-    // ...
+    onComplete: function(cssText, cssArray, nodeArray) {
+      // Do stuff...
+    }
   });
 </script>
 ```
@@ -72,8 +77,11 @@ CDN ([jsdelivr.com](https://www.jsdelivr.com/) shown, also on [unpkg.com](https:
 <!-- ES6 module (latest v1.x.x) -->
 <script type="module">
   import getCssData from 'https://cdn.jsdelivr.net/npm/get-css-data@1/dist/get-css-data.esm.min.js';
+
   getCssData({
-    // ...
+    onComplete(cssText, cssArray, nodeArray) {
+      // Do stuff...
+    }
   });
 </script>
 ```
@@ -109,7 +117,7 @@ JavaScript (see [Options](#options) for details)
 
 ```javascript
 getCssData({
-  onComplete(cssText, cssArray, nodeArray) {
+  onComplete: function(cssText, cssArray, nodeArray) {
     console.log(cssText); // 1
     console.log(cssArray); // 2
     console.log(nodeArray); // 3
@@ -143,16 +151,16 @@ getCssData({
   exclude     : '',
   filter      : '',
   useCSSOM    : false,
-  onBeforeSend(xhr, node, url) {
+  onBeforeSend: function(xhr, node, url) {
     // ...
   },
-  onSuccess(cssText, node, url) {
+  onSuccess: function(cssText, node, url) {
     // ...
   },
-  onError(xhr, node, url) {
+  onError: function(xhr, node, url) {
     // ...
   },
-  onComplete(cssText, cssArray, nodeArray) {
+  onComplete: function(cssText, cssArray, nodeArray) {
     // ...
   }
 });
@@ -189,7 +197,7 @@ getCssData({
 - Type: `string`
 - Default: `"link[rel=stylesheet],style"`
 
-CSS selector matching `<link rel="stylesheet">` and `<style>` nodes to collect data from. The default value includes all style and link nodes.
+CSS selector matching `<link>` and `<style>` nodes to collect data from. The default value includes all style and link nodes.
 
 **Example**
 
@@ -205,7 +213,7 @@ getCssData({
 
 - Type: `string`
 
-CSS selector matching `<link rel="stylesheet">` and `<style>` nodes to exclude from those matched by [options.include](#optionsinclude).
+CSS selector matching `<link>` and `<style>` nodes to exclude from those matched by [options.include](#optionsinclude).
 
 **Example**
 
@@ -267,7 +275,7 @@ Callback before each [XMLHttpRequest](https://developer.mozilla.org/en-US/docs/W
 
 ```javascript
 getCssData({
-  onBeforeSend(xhr, node, url) {
+  onBeforeSend: function(xhr, node, url) {
     // Domain-specific XHR settings
     if (/some-domain.com/.test(url)) {
       xhr.withCredentials = true;
@@ -286,7 +294,7 @@ getCssData({
   1. **node**: The source node `object` reference
   1. **url**: The source URL `string` (`<link>` href, `@import` url, or page url for `<style>` data)
 
-Callback after CSS data has been collected from each node. Allows modifying the CSS data before it is added to the final output by returning any `string` value or skipping the CSS data by returning `false`, `null`, or an empty string (`""`).
+Callback after CSS data has been collected from each node. Allows modifying the CSS data before it is added to the final output by returning any `string` value or skipping the CSS data by returning `false` or an empty string (`""`).
 
 Note that the order in which `<link>` and `@import` CSS data is "successfully" collected (thereby triggering this callback) is not guaranteed as these requests are asynchronous. To access CSS data in DOM order, use the `cssArray` argument passed to the [options.oncomplete](#optionsoncomplete) callback.
 
@@ -294,7 +302,7 @@ Note that the order in which `<link>` and `@import` CSS data is "successfully" c
 
 ```javascript
 getCssData({
-  onSuccess(cssText, node, url) {
+  onSuccess: function(cssText, node, url) {
     // Replace all instances of "color: red" with "color: blue"
     const newCssText = cssText.replace(/color:\s*red\s;/g, 'color: blue;');
 
@@ -318,7 +326,7 @@ Callback after `<link>` or `@import` request has failed or when
 
 ```javascript
 getCssData({
-  onError(xhr, node, url) {
+  onError: function(xhr, node, url) {
     console.log(xhr.status); // 1
     console.log(xhr.statusText); // 2
   }
@@ -342,7 +350,7 @@ Callback after CSS data has been collected from all nodes.
 
 ```javascript
 getCssData({
-  onComplete(cssText, cssArray, nodeArray) {
+  onComplete: function(cssText, cssArray, nodeArray) {
     // ...
   }
 });
