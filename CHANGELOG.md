@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.8.0
+
+*2020-04-26*
+
+- Added `options.skipDisabled` which determines if disabled stylesheets will be
+  skipped while collecting CSS data.
+
 ## 1.7.1
 
 *2020-02-15*

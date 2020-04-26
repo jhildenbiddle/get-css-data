@@ -102,7 +102,9 @@ function getUrls(urls) {
  * @param {object}   [options.filter] Regular expression used to filter node CSS
  *                   data. Each block of CSS data is tested against the filter,
  *                   and only matching data is included.
- * @param {object}   [options.useCSSOM=false] Determines if CSS data will be
+ * @param {boolean}  [options.skipDisabled=true] Determines if disabled
+ *                   stylesheets will be skipped while collecting CSS data.
+ * @param {boolean}  [options.useCSSOM=false] Determines if CSS data will be
  *                   collected from a stylesheet's runtime values instead of its
  *                   text content. This is required to get accurate CSS data
  *                   when a stylesheet has been modified using the deleteRule()
@@ -126,11 +128,12 @@ function getUrls(urls) {
  * @example
  *
  *   getCssData({
- *     rootElement: document,
- *     include    : 'style,link[rel="stylesheet"]',
- *     exclude    : '[href="skip.css"]',
- *     filter     : /red/,
- *     useCSSOM   : false,
+ *     rootElement : document,
+ *     include     : 'style,link[rel="stylesheet"]',
+ *     exclude     : '[href="skip.css"]',
+ *     filter      : /red/,
+ *     skipDisabled: true,
+ *     useCSSOM    : false,
  *     onBeforeSend(xhr, node, url) {
  *       // ...
  *     }
@@ -154,6 +157,7 @@ function getUrls(urls) {
         include: options.include || 'style,link[rel="stylesheet"]',
         exclude: options.exclude || null,
         filter: options.filter || null,
+        skipDisabled: options.skipDisabled !== false,
         useCSSOM: options.useCSSOM || false,
         onBeforeSend: options.onBeforeSend || Function.prototype,
         onSuccess: options.onSuccess || Function.prototype,
@@ -250,9 +254,10 @@ function getUrls(urls) {
         sourceNodes.forEach((function(node, i) {
             var linkHref = node.getAttribute("href");
             var linkRel = node.getAttribute("rel");
-            var isLink = node.nodeName === "LINK" && linkHref && linkRel && linkRel.toLowerCase() === "stylesheet";
+            var isLink = node.nodeName === "LINK" && linkHref && linkRel && linkRel.toLowerCase().indexOf("stylesheet") !== -1;
+            var isSkip = settings.skipDisabled === false ? false : node.disabled;
             var isStyle = node.nodeName === "STYLE";
-            if (isLink) {
+            if (isLink && !isSkip) {
                 getUrls(linkHref, {
                     mimeType: "text/css",
                     onBeforeSend: function onBeforeSend(xhr, url, urlIndex) {
@@ -268,7 +273,7 @@ function getUrls(urls) {
                         handleComplete();
                     }
                 });
-            } else if (isStyle) {
+            } else if (isStyle && !isSkip) {
                 var cssText = node.textContent;
                 if (settings.useCSSOM) {
                     cssText = Array.apply(null, node.sheet.cssRules).map((function(rule) {

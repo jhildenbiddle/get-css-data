@@ -135,6 +135,7 @@ getCssData({
 - [include](#optionsinclude)
 - [exclude](#optionsexclude)
 - [filter](#optionsfilter)
+- [skipDisabled](#optionsskipdisabled)
 - [useCSSOM](#optionsusecssom)
 - [onBeforeSend](#optionsonbeforesend)
 - [onSuccess](#optionsonsuccess)
@@ -150,6 +151,7 @@ getCssData({
   include     : 'link[rel=stylesheet],style',
   exclude     : '',
   filter      : '',
+  skipDisabled: true,
   useCSSOM    : false,
   onBeforeSend: function(xhr, node, url) {
     // ...
@@ -239,6 +241,21 @@ getCssData({
   // of ".myclass". If found, process the CSS.
   // If not, ignore the CSS.
   filter: /\.myclass/,
+});
+```
+
+### options.skipDisabled
+
+- Type: `boolean`
+- Default: `true`
+
+Determines if disabled stylesheets will be skipped while collecting CSS data.
+
+**Example**
+
+```javascript
+getCssData({
+  skipDisabled: true // default
 });
 ```
 

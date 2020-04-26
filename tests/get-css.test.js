@@ -310,6 +310,44 @@ describe('get-css', function() {
             });
         });
 
+        it('options.skipDisabled', function(done) {
+            const linkUrl  = '/base/tests/fixtures/style1.css';
+            const styleCss = fixtures['style1.css'];
+
+            createTestElms([
+                `<link rel="stylesheet" href="${linkUrl}" disabled>`,
+                `<style>${styleCss}</style>`
+            ]);
+
+            for (const sheet of document.styleSheets) {
+                sheet.disabled = sheet.ownerNode.hasAttribute('disabled');
+            }
+
+            function step1() {
+                getCss({
+                    include     : '[data-test]',
+                    skipDisabled: true,
+                    onComplete(cssText, cssArray, nodeArray) {
+                        expect(cssText, 'skipDisabled:true').to.equal(styleCss);
+                        step2();
+                    }
+                });
+            }
+
+            function step2() {
+                getCss({
+                    include     : '[data-test]',
+                    skipDisabled: false,
+                    onComplete(cssText, cssArray, nodeArray) {
+                        expect(cssText, 'skipDisabled:false').to.equal(styleCss.repeat(2));
+                        done();
+                    }
+                });
+            }
+
+            step1();
+        });
+
         it('options.useCSSOM', function(done) {
             const styleCss = fixtures['style1.css'];
             const styleElm = createTestElms({ tag: 'style' })[0];
