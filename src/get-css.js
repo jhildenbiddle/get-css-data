@@ -21,6 +21,10 @@ import getUrls from './get-urls';
  * @param {object}   [options.filter] Regular expression used to filter node CSS
  *                   data. Each block of CSS data is tested against the filter,
  *                   and only matching data is included.
+ * @param {boolean}  [options.matchMedia=true] Determines how `<link>` and
+ *                   `<style>` nodes with a `media` attribute will be processed
+ *                   when the document does not match one of the specified media
+ *                   queries.
  * @param {boolean}  [options.skipDisabled=true] Determines if disabled
  *                   stylesheets will be skipped while collecting CSS data.
  * @param {boolean}  [options.useCSSOM=false] Determines if CSS data will be
@@ -51,6 +55,7 @@ import getUrls from './get-urls';
  *     include     : 'style,link[rel="stylesheet"]',
  *     exclude     : '[href="skip.css"]',
  *     filter      : /red/,
+ *     matchMedia  : true,
  *     skipDisabled: true,
  *     useCSSOM    : false,
  *     onBeforeSend(xhr, node, url) {
@@ -79,6 +84,7 @@ function getCssData(options) {
         include     : options.include      || 'style,link[rel="stylesheet"]',
         exclude     : options.exclude      || null,
         filter      : options.filter       || null,
+        matchMedia  : options.matchMedia   !== false,
         skipDisabled: options.skipDisabled !== false,
         useCSSOM    : options.useCSSOM     || false,
         onBeforeSend: options.onBeforeSend || Function.prototype,
@@ -247,7 +253,11 @@ function getCssData(options) {
             const linkHref = node.getAttribute('href');
             const linkRel  = node.getAttribute('rel');
             const isLink   = node.nodeName === 'LINK' && linkHref && linkRel && linkRel.toLowerCase().indexOf('stylesheet') !== -1;
-            const isSkip   = settings.skipDisabled === false ? false : node.disabled;
+            const isSkip   =
+                // options.skipDisabled
+                (settings.skipDisabled === false ? false : node.disabled) ||
+                // options.matchMedia
+                (settings.matchMedia === false ? false : node.hasAttribute('media') && window && window.matchMedia && !window.matchMedia(node.getAttribute('media')).matches);
             const isStyle  = node.nodeName === 'STYLE';
 
             if (isLink && !isSkip) {

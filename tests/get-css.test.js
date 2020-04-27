@@ -348,6 +348,43 @@ describe('get-css', function() {
             step1();
         });
 
+        if (window && window.matchMedia) {
+            it('options.matchMedia', function(done) {
+                const linkUrl  = '/base/tests/fixtures/style1.css';
+                const styleCss = fixtures['style1.css'];
+
+                createTestElms([
+                    `<link rel="stylesheet" href="${linkUrl}" media="none">`,
+                    `<style media="none">${styleCss}</style>`,
+                    `<style>${styleCss}</style>`,
+                ]);
+
+                function step1(done) {
+                    getCss({
+                        include: '[data-test]',
+                        matchMedia: true,
+                        onComplete(cssText, cssArray, nodeArray) {
+                            expect(cssText).to.equal(styleCss);
+                            step2();
+                        }
+                    });
+                }
+
+                function step2() {
+                    getCss({
+                        include: '[data-test]',
+                        matchMedia: false,
+                        onComplete(cssText, cssArray, nodeArray) {
+                            expect(cssText).to.equal(styleCss.repeat(3));
+                            done();
+                        }
+                    });
+                }
+
+                step1();
+            });
+        }
+
         it('options.useCSSOM', function(done) {
             const styleCss = fixtures['style1.css'];
             const styleElm = createTestElms({ tag: 'style' })[0];

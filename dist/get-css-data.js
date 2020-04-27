@@ -106,6 +106,10 @@
      * @param {object}   [options.filter] Regular expression used to filter node CSS
      *                   data. Each block of CSS data is tested against the filter,
      *                   and only matching data is included.
+     * @param {boolean}  [options.matchMedia=true] Determines how `<link>` and
+     *                   `<style>` nodes with a `media` attribute will be processed
+     *                   when the document does not match one of the specified media
+     *                   queries.
      * @param {boolean}  [options.skipDisabled=true] Determines if disabled
      *                   stylesheets will be skipped while collecting CSS data.
      * @param {boolean}  [options.useCSSOM=false] Determines if CSS data will be
@@ -136,6 +140,7 @@
      *     include     : 'style,link[rel="stylesheet"]',
      *     exclude     : '[href="skip.css"]',
      *     filter      : /red/,
+     *     matchMedia  : true,
      *     skipDisabled: true,
      *     useCSSOM    : false,
      *     onBeforeSend(xhr, node, url) {
@@ -161,6 +166,7 @@
             include: options.include || 'style,link[rel="stylesheet"]',
             exclude: options.exclude || null,
             filter: options.filter || null,
+            matchMedia: options.matchMedia !== false,
             skipDisabled: options.skipDisabled !== false,
             useCSSOM: options.useCSSOM || false,
             onBeforeSend: options.onBeforeSend || Function.prototype,
@@ -259,7 +265,7 @@
                 var linkHref = node.getAttribute("href");
                 var linkRel = node.getAttribute("rel");
                 var isLink = node.nodeName === "LINK" && linkHref && linkRel && linkRel.toLowerCase().indexOf("stylesheet") !== -1;
-                var isSkip = settings.skipDisabled === false ? false : node.disabled;
+                var isSkip = (settings.skipDisabled === false ? false : node.disabled) || (settings.matchMedia === false ? false : node.hasAttribute("media") && window && window.matchMedia && !window.matchMedia(node.getAttribute("media")).matches);
                 var isStyle = node.nodeName === "STYLE";
                 if (isLink && !isSkip) {
                     getUrls(linkHref, {

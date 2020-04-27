@@ -27,6 +27,7 @@ A micro-library for collecting stylesheet data from link and style nodes.
 - Returns CSS data as a concatenated string and a DOM-ordered array of strings
 - Allows document, iframe, and [shadow DOM](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM) traversal
 - Handles `@import` rules
+- Handles `media` attribute
 - Handles absolute and relative URLs
 - Inspect, modify and/or filter CSS data from each node
 - Modify XHR object before each request
@@ -135,6 +136,7 @@ getCssData({
 - [include](#optionsinclude)
 - [exclude](#optionsexclude)
 - [filter](#optionsfilter)
+- [matchMedia](#optionsmatchmedia)
 - [skipDisabled](#optionsskipdisabled)
 - [useCSSOM](#optionsusecssom)
 - [onBeforeSend](#optionsonbeforesend)
@@ -151,6 +153,7 @@ getCssData({
   include     : 'link[rel=stylesheet],style',
   exclude     : '',
   filter      : '',
+  matchMedia  : true,
   skipDisabled: true,
   useCSSOM    : false,
   onBeforeSend: function(xhr, node, url) {
@@ -241,6 +244,25 @@ getCssData({
   // of ".myclass". If found, process the CSS.
   // If not, ignore the CSS.
   filter: /\.myclass/,
+});
+```
+
+### options.matchMedia
+
+- Type: `boolean`
+- Default: `true`
+
+*Requires [window.matchMedia()](https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia) support (IE10+ or a [polyfill](https://github.com/paulirish/matchMedia.js))*
+
+Determines how `<link>` and `<style>` nodes with a `media` attribute will be processed when the document does not match one of the specified media queries.
+
+When `true`, `<link>` and `<style>` nodes with a `media` attribute will only be processed if the document matches at least one of the specified media queries. When `false`, the `media` attribute is ignored.
+
+**Example**
+
+```javascript
+getCssData({
+  matchMedia: true // default
 });
 ```
 

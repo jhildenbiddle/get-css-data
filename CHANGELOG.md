@@ -1,5 +1,13 @@
 # Change Log
 
+## X.X.X
+
+*XXXX-XX-XX*
+
+- Added `options.matchMedia` which determines how `<link>` and `<style>` nodes
+  will be processed when the document does not meet the requirements defined by
+  the node's `media` attribute.
+
 ## 1.8.0
 
 *2020-04-26*
