@@ -35,10 +35,10 @@ function getUrls(urls, options = {}) {
 
     // Functions (Private)
     // -------------------------------------------------------------------------
-    function isValidCss(cssText = '') {
-        const isHTML = cssText.trim().charAt(0) === '<';
+    function isValidCss(cssText) {
+        const isHTML = cssText && cssText.trim().charAt(0) === '<';
 
-        return !isHTML;
+        return cssText && !isHTML;
     }
 
     function onError(xhr, urlIndex) {
@@ -122,6 +122,10 @@ function getUrls(urls, options = {}) {
                 if (xhr.readyState === 4) {
                     // Success
                     if (xhr.status === 200 && isValidCss(xhr.responseText)) {
+                        onSuccess(xhr.responseText, i);
+                    }
+                    // Success via file protocol (file://)
+                    else if (xhr.status === 0 && isValidCss(xhr.responseText)) {
                         onSuccess(xhr.responseText, i);
                     }
                     // Error

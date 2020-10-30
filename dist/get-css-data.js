@@ -23,10 +23,9 @@
         var urlQueue = Array.apply(null, Array(urlArray.length)).map((function(x) {
             return null;
         }));
-        function isValidCss() {
-            var cssText = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
-            var isHTML = cssText.trim().charAt(0) === "<";
-            return !isHTML;
+        function isValidCss(cssText) {
+            var isHTML = cssText && cssText.trim().charAt(0) === "<";
+            return cssText && !isHTML;
         }
         function onError(xhr, urlIndex) {
             settings.onError(xhr, urlArray[urlIndex], urlIndex);
@@ -80,6 +79,8 @@
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState === 4) {
                         if (xhr.status === 200 && isValidCss(xhr.responseText)) {
+                            onSuccess(xhr.responseText, i);
+                        } else if (xhr.status === 0 && isValidCss(xhr.responseText)) {
                             onSuccess(xhr.responseText, i);
                         } else {
                             onError(xhr, i);
