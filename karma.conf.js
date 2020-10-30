@@ -135,8 +135,8 @@ module.exports = function(config) {
             sl_safari: {
                 base       : 'SauceLabs',
                 browserName: 'Safari',
-                platform   : 'OS X 10.10',
-                version    : '8.0'
+                platform   : 'OS X 10.12',
+                version    : 'latest'
             }
         };
         settings.browsers = Object.keys(settings.customLaunchers);
