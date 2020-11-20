@@ -259,9 +259,9 @@
             sourceNodes.forEach((function(node, i) {
                 var linkHref = node.getAttribute("href");
                 var linkRel = node.getAttribute("rel");
-                var isLink = node.nodeName === "LINK" && linkHref && linkRel && linkRel.toLowerCase().indexOf("stylesheet") !== -1;
+                var isLink = node.nodeName.toLowerCase() === "link" && linkHref && linkRel && linkRel.toLowerCase().indexOf("stylesheet") !== -1;
                 var isSkip = settings.skipDisabled === false ? false : node.disabled;
-                var isStyle = node.nodeName === "STYLE";
+                var isStyle = node.nodeName.toLowerCase() === "style";
                 if (isLink && !isSkip) {
                     getUrls(linkHref, {
                         mimeType: "text/css",

@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.9.1
+
+*TBD*
+
+- Fix detection of SVG `<style>` nodes
+
 ## 1.9.0
 
 *2020-10-30*

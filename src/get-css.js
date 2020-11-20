@@ -246,9 +246,9 @@ function getCssData(options) {
         sourceNodes.forEach((node, i) => {
             const linkHref = node.getAttribute('href');
             const linkRel  = node.getAttribute('rel');
-            const isLink   = node.nodeName === 'LINK' && linkHref && linkRel && linkRel.toLowerCase().indexOf('stylesheet') !== -1;
+            const isLink   = node.nodeName.toLowerCase() === 'link' && linkHref && linkRel && linkRel.toLowerCase().indexOf('stylesheet') !== -1;
             const isSkip   = settings.skipDisabled === false ? false : node.disabled;
-            const isStyle  = node.nodeName === 'STYLE';
+            const isStyle  = node.nodeName.toLowerCase() === 'style';
 
             if (isLink && !isSkip) {
                 getUrls(linkHref, {

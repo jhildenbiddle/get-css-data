@@ -81,6 +81,25 @@ describe('get-css', function() {
             });
         });
 
+        it('returns CSS from single SVG <style> node', function(done) {
+            const styleCss = 'circle { stroke: green; }';
+
+            createTestElms(`
+                <svg width="50" height="50" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                    <style>${ styleCss }</style>
+                    <circle cx="25" cy="25" r="20" fill="yellow" stroke-width="5"/>
+                </svg>
+            `);
+
+            getCss({
+                include: 'svg style',
+                onComplete(cssText, cssArray, nodeArray) {
+                    expect(cssText).to.equal(styleCss);
+                    done();
+                }
+            });
+        });
+
         it('returns CSS from multiple <style> nodes', function(done) {
             const styleCss  = fixtures['style1.css'];
             const styleElms = createTestElms(`<style>${styleCss}</style>`.repeat(2));
