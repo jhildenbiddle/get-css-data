@@ -2,7 +2,7 @@
 
 ## 1.9.1
 
-*TBD*
+*2020-11-20*
 
 - Fix detection of SVG `<style>` nodes
 

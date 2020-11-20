@@ -1,6 +1,6 @@
 /*!
  * get-css-data
- * v1.9.0
+ * v1.9.1
  * https://github.com/jhildenbiddle/get-css-data
  * (c) 2018-2020 John Hildenbiddle <http://hildenbiddle.com>
  * MIT license
