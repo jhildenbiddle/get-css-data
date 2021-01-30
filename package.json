@@ -45,6 +45,9 @@
   "browserslist": [
     "ie >= 9"
   ],
+  "files": [
+    "dist"
+  ],
   "main": "dist/get-css-data.js",
   "module": "dist/get-css-data.esm.js",
   "unpkg": "dist/get-css-data.min.js",
