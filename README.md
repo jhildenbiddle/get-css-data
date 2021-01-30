@@ -131,6 +131,7 @@ getCssData({
 
 ## Options
 
+<!-- no toc -->
 - [rootElement](#optionsrootelement)
 - [include](#optionsinclude)
 - [exclude](#optionsexclude)
@@ -282,9 +283,9 @@ getCssData({
 
 - Type: `function`
 - Arguments:
-  1. **xhr**: The XHR `object` containing details of the failed request
-  1. **node**: The source node `object` reference
-  1. **url**: The source URL `string` (`<link>` href or `@import` url)
+  1. **xhr**: The XHR `object` containing details of the request
+  2. **node**: The source node `object` reference
+  3. **url**: The source URL `string` (`<link>` href or `@import` url)
 
 Callback before each [XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) (XHR) is sent. Allows modifying the XML object by setting properties, calling methods, or adding event handlers.
 
@@ -332,9 +333,9 @@ getCssData({
 
 - Type: `function`
 - Arguments:
-  1. **xhr**: The XHR `object` containing details of the failed request
-  1. **node**: The source node `object` reference
-  1. **url**: The source URL `string` (`<link>` href or `@import` url)
+  1. **xhr**: The XHR `object` containing details of the request
+  2. **node**: The source node `object` reference
+  3. **url**: The source URL `string` (`<link>` href or `@import` url)
 
 Callback after `<link>` or `@import` request has failed or when
 `xhr.responseText` appears to be HTML instead of CSS.
