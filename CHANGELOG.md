@@ -1,5 +1,13 @@
 # Change Log
 
+## 2.0.0
+
+*2021-01-30*
+
+- Remove nodes skipped during `onSuccess() from `onComplete()` arguments
+- Support XHR status < 400 for `file://` URLs
+- Remove distributable files from version control
+
 ## 1.9.1
 
 *2020-11-20*
