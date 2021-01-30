@@ -121,7 +121,7 @@ function getUrls(urls, options = {}) {
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                     // Success
-                    if (xhr.status === 200 && isValidCss(xhr.responseText)) {
+                    if (xhr.status < 400 && isValidCss(xhr.responseText)) {
                         onSuccess(xhr.responseText, i);
                     }
                     // Success via file protocol (file://)
