@@ -333,13 +333,13 @@ describe('get-css', function() {
             const linkUrl  = '/base/tests/fixtures/style1.css';
             const styleCss = fixtures['style1.css'];
 
-            createTestElms([
+            const testElms = createTestElms([
                 `<link rel="stylesheet" href="${linkUrl}" disabled>`,
                 `<style>${styleCss}</style>`
             ]);
 
             for (const sheet of document.styleSheets) {
-                sheet.disabled = sheet.ownerNode.hasAttribute('disabled');
+                sheet.disabled = true;
             }
 
             function step1() {
@@ -347,7 +347,13 @@ describe('get-css', function() {
                     include     : '[data-test]',
                     skipDisabled: true,
                     onComplete(cssText, cssArray, nodeArray) {
-                        expect(cssText, 'skipDisabled:true').to.equal(styleCss);
+                        expect(nodeArray.length, '1:nodeArray').to.equal(0);
+                        expect(cssArray.length, '1:cssArray').to.equal(0);
+                        expect(cssText, '1:cssText').to.equal('');
+
+                        // Enable <style> sheet
+                        testElms[1].sheet.disabled = false;
+
                         step2();
                     }
                 });
@@ -356,9 +362,24 @@ describe('get-css', function() {
             function step2() {
                 getCss({
                     include     : '[data-test]',
+                    skipDisabled: true,
+                    onComplete(cssText, cssArray, nodeArray) {
+                        expect(nodeArray.length, '2:nodeArray').to.equal(1);
+                        expect(cssArray.length, '2:cssArray').to.equal(1);
+                        expect(cssText, '2:cssText').to.equal(styleCss);
+                        step3();
+                    }
+                });
+            }
+
+            function step3() {
+                getCss({
+                    include     : '[data-test]',
                     skipDisabled: false,
                     onComplete(cssText, cssArray, nodeArray) {
-                        expect(cssText, 'skipDisabled:false').to.equal(styleCss.repeat(2));
+                        expect(nodeArray.length, '3:nodeArray').to.equal(2);
+                        expect(cssArray.length, '3:cssArray').to.equal(2);
+                        expect(cssText, '3:cssText').to.equal(styleCss.repeat(2));
                         done();
                     }
                 });
@@ -478,7 +499,7 @@ describe('get-css', function() {
             });
         });
 
-        it('filters CSS text based on onSuccess() return value', function(done) {
+        it('filters CSS and nodes based on onSuccess() return value', function(done) {
             const testElms = createTestElms([
                 '<style>.one { color: red; }</style>',
                 '<style>.two { color: green; }</style>',
@@ -498,6 +519,8 @@ describe('get-css', function() {
                 },
                 onComplete(cssText, cssArray, nodeArray) {
                     expect(cssText).to.equal('');
+                    expect(cssArray.length).to.equal(0);
+                    expect(nodeArray.length).to.equal(0);
                     done();
                 }
             });

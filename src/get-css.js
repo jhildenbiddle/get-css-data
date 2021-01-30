@@ -97,6 +97,18 @@ function getCssData(options) {
         const isComplete = cssArray.indexOf(null) === -1;
 
         if (isComplete) {
+            // Remove skipped nodes/css
+            cssArray
+                .reduce((skipIndices, value, i) => {
+                    if (value === '') {
+                        skipIndices.push(i);
+                    }
+
+                    return skipIndices;
+                }, [])
+                .reverse()
+                .forEach(skipIndex => [sourceNodes, cssArray].forEach(arr => arr.splice(skipIndex, 1)));
+
             const cssText = cssArray.join('');
 
             settings.onComplete(cssText, cssArray, sourceNodes);

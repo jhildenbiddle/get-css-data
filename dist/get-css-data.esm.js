@@ -2,7 +2,7 @@
  * get-css-data
  * v1.9.1
  * https://github.com/jhildenbiddle/get-css-data
- * (c) 2018-2020 John Hildenbiddle <http://hildenbiddle.com>
+ * (c) 2018-2021 John Hildenbiddle <http://hildenbiddle.com>
  * MIT license
  */
 function getUrls(urls) {
@@ -174,6 +174,16 @@ function getUrls(urls) {
     function handleComplete() {
         var isComplete = cssArray.indexOf(null) === -1;
         if (isComplete) {
+            cssArray.reduce((function(skipIndices, value, i) {
+                if (value === "") {
+                    skipIndices.push(i);
+                }
+                return skipIndices;
+            }), []).reverse().forEach((function(skipIndex) {
+                return [ sourceNodes, cssArray ].forEach((function(arr) {
+                    return arr.splice(skipIndex, 1);
+                }));
+            }));
             var cssText = cssArray.join("");
             settings.onComplete(cssText, cssArray, sourceNodes);
         }
