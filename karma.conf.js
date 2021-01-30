@@ -114,12 +114,6 @@ module.exports = function(config) {
                 platform   : 'Windows 10',
                 version    : '48.0'
             },
-            sl_edge: {
-                base       : 'SauceLabs',
-                browserName: 'MicrosoftEdge',
-                platform   : 'Windows 10',
-                version    : '14.14393'
-            },
             sl_firefox: {
                 base       : 'SauceLabs',
                 browserName: 'Firefox',
