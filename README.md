@@ -62,8 +62,8 @@ git clone https://github.com/jhildenbiddle/get-css-data.git
 CDN ([jsdelivr.com](https://www.jsdelivr.com/) shown, also on [unpkg.com](https://unpkg.com/)):
 
 ```html
-<!-- ES5 (latest v1.x.x) -->
-<script src="https://cdn.jsdelivr.net/npm/get-css-data@1"></script>
+<!-- ES5 (latest v2.x.x) -->
+<script src="https://cdn.jsdelivr.net/npm/get-css-data@2"></script>
 <script>
   getCssData({
     onComplete: function(cssText, cssArray, nodeArray) {
@@ -74,9 +74,9 @@ CDN ([jsdelivr.com](https://www.jsdelivr.com/) shown, also on [unpkg.com](https:
 ```
 
 ```html
-<!-- ES6 module (latest v1.x.x) -->
+<!-- ES6 module (latest v2.x.x) -->
 <script type="module">
-  import getCssData from 'https://cdn.jsdelivr.net/npm/get-css-data@1/dist/get-css-data.esm.min.js';
+  import getCssData from 'https://cdn.jsdelivr.net/npm/get-css-data@2/dist/get-css-data.esm.min.js';
 
   getCssData({
     onComplete(cssText, cssArray, nodeArray) {
