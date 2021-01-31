@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.1
+
+*2021-01-30*
+
+- Update version number in CDN URLs
+
 ## 2.0.0
 
 *2021-01-30*
