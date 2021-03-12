@@ -223,6 +223,24 @@ describe('get-css', function() {
             });
         });
 
+        it('returns empty string from single <link> node w/ empty stylesheet', function(done) {
+            const linkUrl  = '/base/tests/fixtures/style-empty.css';
+            const expected = fixtures['style-empty.css'];
+
+            createTestElms(`<link rel="stylesheet" href="${linkUrl}">`);
+
+            getCss({
+                include: '[data-test]',
+                onError(xhr, node, url) {
+                    console.log('Error', node, url);
+                },
+                onComplete(cssText, cssArray, nodeArray) {
+                    expect(cssText).to.equal(expected);
+                    done();
+                }
+            });
+        });
+
         it('returns CSS from multiple <link> nodes with flat @import', function(done) {
             const linkUrl  = '/base/tests/fixtures/style2.css';
             const linkElms = createTestElms(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));

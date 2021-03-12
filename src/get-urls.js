@@ -35,10 +35,11 @@ function getUrls(urls, options = {}) {
 
     // Functions (Private)
     // -------------------------------------------------------------------------
-    function isValidCss(cssText) {
-        const isHTML = cssText && cssText.trim().charAt(0) === '<';
+    function isValidCss(text) {
+        const isString = typeof text === 'string';
+        const isHTML = isString && text.trim().charAt(0) === '<';
 
-        return cssText && !isHTML;
+        return isString && !isHTML;
     }
 
     function onError(xhr, urlIndex) {
@@ -82,8 +83,10 @@ function getUrls(urls, options = {}) {
                 xdr.onprogress = Function.prototype; // Prevent aborts/timeouts
                 xdr.ontimeout = Function.prototype; // Prevent aborts/timeouts
                 xdr.onload = function() {
-                    if (isValidCss(xdr.responseText)) {
-                        onSuccess(xdr.responseText, i);
+                    const text = xdr.responseText;
+
+                    if (isValidCss(text)) {
+                        onSuccess(text, i);
                     }
                     else {
                         onError(xdr, i);
@@ -120,13 +123,15 @@ function getUrls(urls, options = {}) {
 
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
+                    const text = xhr.responseText;
+
                     // Success
-                    if (xhr.status < 400 && isValidCss(xhr.responseText)) {
-                        onSuccess(xhr.responseText, i);
+                    if (xhr.status < 400 && isValidCss(text)) {
+                        onSuccess(text, i);
                     }
                     // Success via file protocol (file://)
-                    else if (xhr.status === 0 && isValidCss(xhr.responseText)) {
-                        onSuccess(xhr.responseText, i);
+                    else if (xhr.status === 0 && isValidCss(text)) {
+                        onSuccess(text, i);
                     }
                     // Error
                     else {
