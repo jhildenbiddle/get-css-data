@@ -93,7 +93,7 @@ function getUrls(urls, options = {}) {
                     onError(xdr, i);
                 };
 
-                // Wrap in setTimeout to fix known issues wtih XDomainRequest
+                // Wrap in setTimeout to fix known issues with XDomainRequest
                 // when sending multiple requests
                 setTimeout(function() {
                     xdr.send();
