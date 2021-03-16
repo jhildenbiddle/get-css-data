@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.0.2
+
+*2021-03-16*
+
+- Fix empty `<link>` stylesheet triggering `onError()` callback
+
 ## 2.0.1
 
 *2021-01-30*
@@ -10,7 +16,7 @@
 
 *2021-01-30*
 
-- Remove nodes skipped during `onSuccess() from `onComplete()` arguments
+- Remove nodes skipped during `onSuccess()` from `onComplete()` arguments
 - Support XHR status < 400 for `file://` URLs
 - Remove distributable files from version control
 
