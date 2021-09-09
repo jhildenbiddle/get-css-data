@@ -1,8 +1,8 @@
 # get-css-data
 
 [![NPM](https://img.shields.io/npm/v/get-css-data.svg?style=flat-square)](https://www.npmjs.com/package/get-css-data)
-[![Build Status](https://img.shields.io/travis/jhildenbiddle/get-css-data/master.svg?style=flat-square)](https://travis-ci.org/jhildenbiddle/get-css-data)
-[![Codacy grade](https://img.shields.io/codacy/grade/57eb5b1190054035bbc78ba24868742e.svg?style=flat-square)](https://www.codacy.com/app/jhildenbiddle/get-css-data?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jhildenbiddle/get-css-data&amp;utm_campaign=Badge_Grade)
+[![GitHub Workflow Status (master)](https://img.shields.io/github/workflow/status/jhildenbiddle/get-css-data/Build%20&%20Test/master?label=checks&style=flat-square)](https://github.com/jhildenbiddle/get-css-data/actions?query=branch%3Amaster+)
+[![Codacy](https://img.shields.io/codacy/grade/ec8f2d2595804ab38ad138b762a640e6/master?style=flat-square)](https://app.codacy.com/gh/jhildenbiddle/get-css-data/dashboard?branch=master)
 [![Codecov](https://img.shields.io/codecov/c/github/jhildenbiddle/get-css-data.svg?style=flat-square)](https://codecov.io/gh/jhildenbiddle/get-css-data)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://github.com/jhildenbiddle/get-css-data/blob/master/LICENSE)
 [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?url=https%3A%2F%2Fgithub.com%2Fjhildenbiddle%2Fget-css-data&via=jhildenbiddle&hashtags=css,developers,frontend,javascript)
