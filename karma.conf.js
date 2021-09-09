@@ -145,13 +145,6 @@ module.exports = function(config) {
             project  : pkg.name,
             video    : false
         };
-
-        // Travis CI
-        if ('TRAVIS' in process.env) {
-            // Use custom hostname to prevent Safari disconnects
-            // https://support.saucelabs.com/hc/en-us/articles/115010079868-Issues-with-Safari-and-Karma-Test-Runner
-            settings.hostname = 'travis.dev';
-        }
     }
     // Local
     else {
