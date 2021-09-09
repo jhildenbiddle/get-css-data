@@ -58,5 +58,4 @@ jobs:
       - name: Report code coverage
         uses: codacy/codacy-coverage-reporter-action@v1
         with:
-          project-token: ${{ secrets.CODACY_API_TOKEN }}
-          coverage-reports: coverage/cobertura-coverage.xml
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
