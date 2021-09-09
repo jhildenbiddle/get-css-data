@@ -22,12 +22,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Report code coverage
-        uses: codacy/codacy-coverage-reporter-action@v1
-        with:
-          project-token: ${{ secrets.CODACY_API_TOKEN }}
-          coverage-reports: cobertura-coverage.xml
-
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -60,3 +54,9 @@ jobs:
         uses: browserstack/github-actions/setup-local@master
         with:
           local-testing: stop
+
+      - name: Report code coverage
+        uses: codacy/codacy-coverage-reporter-action@v1
+        with:
+          project-token: ${{ secrets.CODACY_API_TOKEN }}
+          coverage-reports: cobertura-coverage.xml
