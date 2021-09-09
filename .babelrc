@@ -1,0 +1,11 @@
+{
+  "exclude": ["node_modules/**"],
+  "presets": [
+      ["@babel/preset-env", {
+          "targets": "ie >= 9"
+      }]
+  ],
+  "plugins": [
+      "transform-custom-element-classes"
+  ]
+}
