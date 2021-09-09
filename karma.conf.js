@@ -66,7 +66,7 @@ const settings = {
     // Code coverage
     // https://github.com/mattlewis92/karma-coverage-istanbul-reporter
     coverageIstanbulReporter: {
-        reports                : ['lcovonly', 'text-summary'],
+        reports                : ['cobertura', 'lcovonly', 'text-summary'],
         combineBrowserReports  : true,
         fixWebpackSourcePaths  : true,
         skipFilesWithNoCoverage: true
