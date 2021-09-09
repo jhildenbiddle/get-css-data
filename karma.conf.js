@@ -25,7 +25,7 @@ const settings = {
         [files.fixtures]: ['file-fixtures'],
         [files.test]    : ['eslint', 'webpack', 'sourcemap']
     },
-    frameworks: ['mocha', 'chai'],
+    frameworks: ['mocha', 'chai', 'webpack'],
     reporters : ['mocha', 'coverage-istanbul'],
     fileFixtures: {
         stripPrefix: 'tests/fixtures/'
