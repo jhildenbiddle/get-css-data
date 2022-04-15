@@ -263,10 +263,10 @@ function getCssData(options) {
             const isStyle  = node.nodeName.toLowerCase() === 'style';
 
             if (isLink && !isSkip) {
-                const isURIScheme = linkHref.indexOf("data:text/css") !== -1;
+                const isURIScheme = linkHref.indexOf('data:text/css') !== -1;
 
                 if (isURIScheme) {
-                    let cssText = decodeURIComponent(linkHref.substring(linkHref.indexOf(",") + 1));
+                    let cssText = decodeURIComponent(linkHref.substring(linkHref.indexOf(',') + 1));
 
                     if (settings.useCSSOM) {
                         cssText = Array.apply(null, node.sheet.cssRules)
