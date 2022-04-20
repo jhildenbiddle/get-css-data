@@ -179,6 +179,21 @@ describe('get-css', function() {
             });
         });
 
+        it('returns CSS from single <link> node with URI Scheme', function(done) {
+            const URIScheme  = 'data:text/css,p%7Bcolor%3Agreen%3B%7D';
+            const expected = fixtures['style-uri-scheme-out.css'];
+
+            createTestElms(`<link rel="stylesheet" href="${URIScheme}" />`);
+
+            getCss({
+                include: '[data-test]',
+                onComplete(cssText, cssArray, nodeArray) {
+                    expect(cssText).to.equal(expected);
+                    done();
+                }
+            });
+        });
+
         it('returns CSS from single <link> node via CORS', function(done) {
             const linkProtocol = 'https:';
             const linkUrl      = `${linkProtocol}//cdn.jsdelivr.net/npm/get-css-data@1.0.0/tests/fixtures/style1.css`;
@@ -213,6 +228,20 @@ describe('get-css', function() {
             const linkUrl  = '/base/tests/fixtures/style1.css';
             const linkElms = createTestElms(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));
             const expected = fixtures['style1.css'].repeat(linkElms.length);
+
+            getCss({
+                include: '[data-test]',
+                onComplete(cssText, cssArray, nodeArray) {
+                    expect(cssText).to.equal(expected);
+                    done();
+                }
+            });
+        });
+
+        it('returns CSS from multiple <link> nodes with URI Scheme', function(done) {
+            const URIScheme  = 'data:text/css,p%7Bcolor%3Agreen%3B%7D';
+            const linkElms = createTestElms(`<link rel="stylesheet" href="${URIScheme}">`.repeat(2));
+            const expected = fixtures['style-uri-scheme-out.css'].repeat(linkElms.length);
 
             getCss({
                 include: '[data-test]',
