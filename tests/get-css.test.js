@@ -179,9 +179,10 @@ describe('get-css', function() {
             });
         });
 
-        it('returns CSS from single <link> node with URI Scheme', function(done) {
-            const URIScheme  = 'data:text/css,p%7Bcolor%3Agreen%3B%7D';
-            const expected = fixtures['style-uri-scheme-out.css'];
+        it('returns CSS from single <link> node with data URI scheme', function(done) {
+            const encodedCSS = encodeURIComponent(fixtures['style1.css']);
+            const URIScheme  = `data:text/css;charset=UTF-8,${encodedCSS}`;
+            const expected = fixtures['style1.css'];
 
             createTestElms(`<link rel="stylesheet" href="${URIScheme}" />`);
 
@@ -238,10 +239,11 @@ describe('get-css', function() {
             });
         });
 
-        it('returns CSS from multiple <link> nodes with URI Scheme', function(done) {
-            const URIScheme  = 'data:text/css,p%7Bcolor%3Agreen%3B%7D';
+        it('returns CSS from multiple <link> nodes with data URI scheme', function(done) {
+            const encodedCSS = encodeURIComponent(fixtures['style1.css']);
+            const URIScheme  = `data:text/css;charset=UTF-8,${encodedCSS}`;
             const linkElms = createTestElms(`<link rel="stylesheet" href="${URIScheme}">`.repeat(2));
-            const expected = fixtures['style-uri-scheme-out.css'].repeat(linkElms.length);
+            const expected = fixtures['style1.css'].repeat(linkElms.length);
 
             getCss({
                 include: '[data-test]',
