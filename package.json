@@ -54,10 +54,10 @@
     "dev": "npm start | npm run test-watch",
     "lint": "eslint . && markdownlint . --ignore node_modules",
     "start": "rimraf coverage/* && npm run build -- --watch",
-    "test": "rimraf coverage/* && karma start",
+    "test": "rimraf coverage/* && npm run lint && karma start",
     "test-watch": "npm test -- --auto-watch --no-single-run",
     "test-remote": "npm test -- --remote",
-    "version": "npm run build && npm test"
+    "version": "npm run lint && npm run build && npm test"
   },
   "devDependencies": {
     "@babel/core": "^7.13.10",
