@@ -30,7 +30,7 @@ const settings = {
     ],
     preprocessors: {
         [files.fixtures]: ['file-fixtures'],
-        [files.test]    : ['eslint', 'webpack', 'sourcemap']
+        [files.test]    : ['webpack', 'sourcemap']
     },
     frameworks: ['mocha', 'chai', 'webpack'],
     reporters : ['mocha', 'coverage-istanbul'], // 'Browserstack' added below
