@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.1.0
+
+*2022-04-21*
+
+- Add support for `<link>` elements using data URIs
+
 ## 2.0.2
 
 *2021-03-16*
