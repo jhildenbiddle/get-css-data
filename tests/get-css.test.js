@@ -437,7 +437,7 @@ describe('get-css', function() {
             step1();
         });
 
-        it('options.useCSSOM', function(done) {
+        it('options.useCSSOM with <style>', function(done) {
             const styleCss = fixtures['style1.css'];
             const styleElm = createTestElms({ tag: 'style' })[0];
 
@@ -456,6 +456,32 @@ describe('get-css', function() {
                 useCSSOM: true,
                 onComplete(cssText, cssArray, nodeArray) {
                     expect(cssText, 'After insertRule()').to.equal(styleCss);
+                    done();
+                }
+            });
+        });
+
+        it('options.useCSSOM with data URI scheme', function(done) {
+            const encodedCSS = encodeURIComponent(fixtures['style1.css']);
+            const URIScheme  = `data:text/css;charset=UTF-8,${encodedCSS}`;
+            const styleCss = fixtures['style1.css'];
+            const styleElm = createTestElms(`<link rel="stylesheet" href="${URIScheme}" />`)[0];
+
+            getCss({
+                include: '[data-test]',
+                useCSSOM: false,
+                onComplete(cssText, cssArray, nodeArray) {
+                    expect(cssText, 'Before deleteRule()').to.equal(styleCss);
+                }
+            });
+
+            styleElm.sheet.deleteRule(0);
+
+            getCss({
+                include: '[data-test]',
+                useCSSOM: true,
+                onComplete(cssText, cssArray, nodeArray) {
+                    expect(cssText, 'After deleteRule()').to.equal('');
                     done();
                 }
             });
