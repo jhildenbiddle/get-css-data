@@ -179,6 +179,22 @@ describe('get-css', function() {
             });
         });
 
+        it('returns CSS from single <link> node with data URI scheme', function(done) {
+            const encodedCSS = encodeURIComponent(fixtures['style1.css']);
+            const URIScheme  = `data:text/css;charset=UTF-8,${encodedCSS}`;
+            const expected = fixtures['style1.css'];
+
+            createTestElms(`<link rel="stylesheet" href="${URIScheme}" />`);
+
+            getCss({
+                include: '[data-test]',
+                onComplete(cssText, cssArray, nodeArray) {
+                    expect(cssText).to.equal(expected);
+                    done();
+                }
+            });
+        });
+
         it('returns CSS from single <link> node via CORS', function(done) {
             const linkProtocol = 'https:';
             const linkUrl      = `${linkProtocol}//cdn.jsdelivr.net/npm/get-css-data@1.0.0/tests/fixtures/style1.css`;
@@ -212,6 +228,21 @@ describe('get-css', function() {
         it('returns CSS from multiple <link> nodes', function(done) {
             const linkUrl  = '/base/tests/fixtures/style1.css';
             const linkElms = createTestElms(`<link rel="stylesheet" href="${linkUrl}">`.repeat(2));
+            const expected = fixtures['style1.css'].repeat(linkElms.length);
+
+            getCss({
+                include: '[data-test]',
+                onComplete(cssText, cssArray, nodeArray) {
+                    expect(cssText).to.equal(expected);
+                    done();
+                }
+            });
+        });
+
+        it('returns CSS from multiple <link> nodes with data URI scheme', function(done) {
+            const encodedCSS = encodeURIComponent(fixtures['style1.css']);
+            const URIScheme  = `data:text/css;charset=UTF-8,${encodedCSS}`;
+            const linkElms = createTestElms(`<link rel="stylesheet" href="${URIScheme}">`.repeat(2));
             const expected = fixtures['style1.css'].repeat(linkElms.length);
 
             getCss({
@@ -406,7 +437,7 @@ describe('get-css', function() {
             step1();
         });
 
-        it('options.useCSSOM', function(done) {
+        it('options.useCSSOM with <style>', function(done) {
             const styleCss = fixtures['style1.css'];
             const styleElm = createTestElms({ tag: 'style' })[0];
 
@@ -425,6 +456,32 @@ describe('get-css', function() {
                 useCSSOM: true,
                 onComplete(cssText, cssArray, nodeArray) {
                     expect(cssText, 'After insertRule()').to.equal(styleCss);
+                    done();
+                }
+            });
+        });
+
+        it('options.useCSSOM with data URI scheme', function(done) {
+            const encodedCSS = encodeURIComponent(fixtures['style1.css']);
+            const URIScheme  = `data:text/css;charset=UTF-8,${encodedCSS}`;
+            const styleCss = fixtures['style1.css'];
+            const styleElm = createTestElms(`<link rel="stylesheet" href="${URIScheme}" />`)[0];
+
+            getCss({
+                include: '[data-test]',
+                useCSSOM: false,
+                onComplete(cssText, cssArray, nodeArray) {
+                    expect(cssText, 'Before deleteRule()').to.equal(styleCss);
+                }
+            });
+
+            styleElm.sheet.deleteRule(0);
+
+            getCss({
+                include: '[data-test]',
+                useCSSOM: true,
+                onComplete(cssText, cssArray, nodeArray) {
+                    expect(cssText, 'After deleteRule()').to.equal('');
                     done();
                 }
             });

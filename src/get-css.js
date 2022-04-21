@@ -263,23 +263,37 @@ function getCssData(options) {
             const isStyle  = node.nodeName.toLowerCase() === 'style';
 
             if (isLink && !isSkip) {
-                getUrls(linkHref, {
-                    mimeType: 'text/css',
-                    onBeforeSend(xhr, url, urlIndex) {
-                        settings.onBeforeSend(xhr, node, url);
-                    },
-                    onSuccess(cssText, url, urlIndex) {
-                        // Convert relative linkHref to absolute url
-                        const sourceUrl = getFullUrl(linkHref);
+                const isURIScheme = linkHref.indexOf('data:text/css') !== -1;
 
-                        handleSuccess(cssText, i, node, sourceUrl);
-                    },
-                    onError(xhr, url, urlIndex) {
-                        cssArray[i] = '';
-                        settings.onError(xhr, node, url);
-                        handleComplete();
+                if (isURIScheme) {
+                    let cssText = decodeURIComponent(linkHref.substring(linkHref.indexOf(',') + 1));
+
+                    if (settings.useCSSOM) {
+                        cssText = Array.apply(null, node.sheet.cssRules)
+                            .map(rule => rule.cssText)
+                            .join('');
                     }
-                });
+    
+                    handleSuccess(cssText, i, node, location.href);
+                } else {
+                    getUrls(linkHref, {
+                        mimeType: 'text/css',
+                        onBeforeSend(xhr, url, urlIndex) {
+                            settings.onBeforeSend(xhr, node, url);
+                        },
+                        onSuccess(cssText, url, urlIndex) {
+                            // Convert relative linkHref to absolute url
+                            const sourceUrl = getFullUrl(linkHref);
+    
+                            handleSuccess(cssText, i, node, sourceUrl);
+                        },
+                        onError(xhr, url, urlIndex) {
+                            cssArray[i] = '';
+                            settings.onError(xhr, node, url);
+                            handleComplete();
+                        }
+                    });
+                }
             }
             else if (isStyle && !isSkip) {
                 let cssText = node.textContent;
