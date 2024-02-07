@@ -1,7 +1,7 @@
 # get-css-data
 
 [![NPM](https://img.shields.io/npm/v/get-css-data.svg?style=flat-square)](https://www.npmjs.com/package/get-css-data)
-[![GitHub Workflow Status (master)](https://img.shields.io/github/workflow/status/jhildenbiddle/get-css-data/Build%20&%20Test/master?label=checks&style=flat-square)](https://github.com/jhildenbiddle/get-css-data/actions?query=branch%3Amaster+)
+[![GitHub Workflow Status (master)](https://img.shields.io/github/actions/workflow/status/jhildenbiddle/get-css-data/test.yml?branch=master&label=checks&style=flat-square)](https://github.com/jhildenbiddle/get-css-data/actions?query=branch%3Amaster+)
 [![Codacy code quality](https://img.shields.io/codacy/grade/ec8f2d2595804ab38ad138b762a640e6/master?style=flat-square)](https://app.codacy.com/gh/jhildenbiddle/get-css-data/dashboard?branch=master)
 [![Codacy branch coverage](https://img.shields.io/codacy/coverage/ec8f2d2595804ab38ad138b762a640e6/master?style=flat-square)](https://app.codacy.com/gh/jhildenbiddle/get-css-data/dashboard?branch=master)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://github.com/jhildenbiddle/get-css-data/blob/master/LICENSE)
